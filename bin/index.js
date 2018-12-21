@@ -10,11 +10,8 @@ const inquirer = require("inquirer");
 const { parseOutDatedDependencies } = require("../src/utils");
 const questions = require("../src/questions.json");
 
-// CONSTANT
-const NPM_COMMAND = "npm outdated --json";
-
 async function main() {
-    console.log(`\n${gray(` > ${NPM_COMMAND}`)}`);
+    console.log(`\n${gray(" > npm outdated --json")}`);
     const { stdout } = cross.sync("npm", ["outdated", "--json"]);
     const outdated = parseOutDatedDependencies(stdout);
 
