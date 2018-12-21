@@ -48,7 +48,30 @@ function parseOutDatedDependencies(stdout) {
     return Object.values(result);
 }
 
+/**
+ * @exports utils/findPkgKind
+ * @func findPkgKind
+ * @memberof Utils#
+ * @param {*} packageJSON packageJSON
+ * @param {Depup.Dependencies} pkg pkg
+ * @returns {String}
+ */
+function findPkgKind(packageJSON, pkg) {
+    const dependencies = packageJSON.dependencies || {};
+    if (Reflect.has(dependencies, pkg.name)) {
+        return "Dependencies";
+    }
+
+    const devDependencies = packageJSON.devDependencies || {};
+    if (Reflect.has(devDependencies, pkg.name)) {
+        return "DevDependencies";
+    }
+
+    return "Dependencies";
+}
+
 module.exports = {
     taggedString,
-    parseOutDatedDependencies
+    parseOutDatedDependencies,
+    findPkgKind
 };

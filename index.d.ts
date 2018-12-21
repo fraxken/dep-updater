@@ -9,6 +9,8 @@ declare namespace Depup {
         latest: string;
         location: string;
         breaking: boolean;
+        updateTo?: string;
+        kind?: "Dependencies" | "DevDependencies";
     }
 }
 

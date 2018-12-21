@@ -4,10 +4,11 @@ require("make-promises-safe");
 // Require Node.js Dependencies
 const { strictEqual } = require("assert").strict;
 const { join } = require("path");
-const { existsSync } = require("fs");
+const { promisify } = require("util");
+const { existsSync, readFile } = require("fs");
 
 // Require Third-party Dependencies
-const { gray, green, bold, yellow, cyan } = require("kleur");
+const { gray, green, bold, yellow, cyan, red } = require("kleur");
 const cross = require("cross-spawn");
 const inquirer = require("inquirer");
 
@@ -17,9 +18,57 @@ const questions = require("../src/questions.json");
 
 // CONSTANTS
 const STDIO = { stdio: "inherit" };
+const CWD = process.cwd();
+const KIND_FLAG = new Map([
+    ["Dependencies", "-P"],
+    ["DevDependencies", "-D"]
+]);
 
 // VARIABLES
+const readFileAsync = promisify(readFile);
 const gitTemplate = taggedString`"chore(package): update ${"name"} from ${"from"} to ${"to"}"`;
+
+/**
+ * @func npmInstall
+ * @param {Depup.Dependencies} pkg package to install
+ * @param {Boolean} [hasPackageLock=false] define is package can be installed with ci
+ * @returns {void}
+ */
+function npmInstall(pkg, hasPackageLock = false) {
+    const kind = KIND_FLAG.get(pkg.kind);
+
+    if (pkg.updateTo === pkg.wanted) {
+        console.log(` > npm update ${green(pkg.name)}`);
+        cross.sync("npm", ["update", pkg.name, kind]);
+    }
+    else {
+        console.log(` > npm remove ${green(pkg.name)}`);
+        cross.sync("npm", ["remove", pkg.name, kind]);
+
+        const completePackageName = `${green(pkg.name)}@${cyan(pkg.updateTo)}`;
+        const installCMD = hasPackageLock ? "ci" : "install";
+        console.log(` > npm ${installCMD} ${completePackageName}`);
+        cross.sync("npm", [installCMD, completePackageName, kind]);
+    }
+}
+
+/**
+ * @func npmRollback
+ * @param {Depup.Dependencies} pkg package to install
+ * @param {Boolean} [hasPackageLock=false] define is package can be installed with ci
+ * @returns {void}
+ */
+function npmRollback(pkg, hasPackageLock = false) {
+    const kind = KIND_FLAG.get(pkg.kind);
+
+    console.log(` > npm remove ${green(pkg.name)}`);
+    cross.sync("npm", ["remove", pkg.name, kind]);
+
+    const completePackageName = `${green(pkg.name)}@${cyan(pkg.current)}`;
+    const installCMD = hasPackageLock ? "ci" : "install";
+    console.log(` > npm ${installCMD} ${completePackageName}`);
+    cross.sync("npm", [installCMD, completePackageName, kind]);
+}
 
 /**
  * @async
@@ -30,6 +79,11 @@ async function main() {
     console.log(`\n${gray(" > npm outdated --json")}`);
     const { stdout } = cross.sync("npm", ["outdated", "--json"]);
     const outdated = parseOutDatedDependencies(stdout);
+
+    // Read local package.json
+    const localPackage = JSON.parse(
+        await readFileAsync(join(CWD, "package.json"), { encoding: "utf8" })
+    );
 
     // Define list of packages to update!
     const packageToUpdate = [];
@@ -45,7 +99,9 @@ async function main() {
             continue;
         }
 
+        pkg.kind = findPkgKind(localPackage, pkg);
         pkg.updateTo = updateTo;
+
         if (pkg.wanted !== pkg.latest && pkg.current !== pkg.wanted) {
             const { release } = await inquirer.prompt([{
                 type: "list",
@@ -91,7 +147,7 @@ async function main() {
         strictEqual(Reflect.has(scripts, "test"), true, new Error("unable to found npm test script"));
         console.log("👍 npm test script must exist");
     }
-    const hasPackageLock = existsSync(join(process.cwd(), "package-lock.json"));
+    const hasPackageLock = existsSync(join(CWD, "package-lock.json"));
 
     console.log(`\n${gray(" > Everything is okay ... Running update in one second.")}\n`);
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -99,19 +155,7 @@ async function main() {
     // Run updates!
     for (const pkg of packageToUpdate) {
         console.log(`\nupdating ${bold(green(pkg.name))} (${yellow(pkg.current)} -> ${cyan(pkg.updateTo)})`);
-        if (pkg.updateTo === pkg.wanted) {
-            console.log(` > npm update ${green(pkg.name)}`);
-            cross.sync("npm", ["update", pkg.name]);
-        }
-        else {
-            console.log(` > npm remove ${green(pkg.name)}`);
-            cross.sync("npm", ["remove", pkg.name]);
-
-            const completePackageName = `${green(pkg.name)}@${cyan(pkg.updateTo)}`;
-            const installCMD = hasPackageLock ? "ci" : "install";
-            console.log(` > npm ${installCMD} ${completePackageName}`);
-            cross.sync("npm", [installCMD, completePackageName]);
-        }
+        npmInstall(pkg, hasPackageLock);
 
         if (runTest) {
             console.log(" > npm test");
@@ -120,8 +164,10 @@ async function main() {
                 strictEqual(signal, null);
             }
             catch (error) {
-                console.error(error);
-                // TODO: rollback!
+                console.log(red("An Error occured while executing tests!"));
+                npmRollback(pkg, hasPackageLock);
+
+                continue;
             }
         }
 
