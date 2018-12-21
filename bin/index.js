@@ -38,16 +38,16 @@ function npmInstall(pkg, hasPackageLock = false) {
     const kind = KIND_FLAG.get(pkg.kind);
 
     if (pkg.updateTo === pkg.wanted) {
-        console.log(` > npm update ${green(pkg.name)}`);
+        console.log(` > npm update ${green(pkg.name)} ${kind}`);
         cross.sync("npm", ["update", pkg.name, kind]);
     }
     else {
-        console.log(` > npm remove ${green(pkg.name)}`);
+        console.log(` > npm remove ${green(pkg.name)} ${kind}`);
         cross.sync("npm", ["remove", pkg.name, kind]);
 
         const completePackageName = `${green(pkg.name)}@${cyan(pkg.updateTo)}`;
         const installCMD = hasPackageLock ? "ci" : "install";
-        console.log(` > npm ${installCMD} ${completePackageName}`);
+        console.log(` > npm ${installCMD} ${completePackageName} ${kind}`);
         cross.sync("npm", [installCMD, completePackageName, kind]);
     }
 }
@@ -61,12 +61,12 @@ function npmInstall(pkg, hasPackageLock = false) {
 function npmRollback(pkg, hasPackageLock = false) {
     const kind = KIND_FLAG.get(pkg.kind);
 
-    console.log(` > npm remove ${green(pkg.name)}`);
+    console.log(` > npm remove ${green(pkg.name)} ${kind}`);
     cross.sync("npm", ["remove", pkg.name, kind]);
 
     const completePackageName = `${green(pkg.name)}@${cyan(pkg.current)}`;
     const installCMD = hasPackageLock ? "ci" : "install";
-    console.log(` > npm ${installCMD} ${completePackageName}`);
+    console.log(` > npm ${installCMD} ${completePackageName} ${kind}`);
     cross.sync("npm", [installCMD, completePackageName, kind]);
 }
 
