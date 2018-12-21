@@ -13,7 +13,7 @@ const cross = require("cross-spawn");
 const inquirer = require("inquirer");
 
 // Require Internal Dependencies
-const { parseOutDatedDependencies, taggedString } = require("../src/utils");
+const { parseOutDatedDependencies, taggedString, findPkgKind } = require("../src/utils");
 const questions = require("../src/questions.json");
 
 // CONSTANTS
@@ -133,6 +133,7 @@ async function main() {
     ]);
 
     // Verify test and git on the local root/system
+    console.log("");
     if (gitCommit) {
         const { signal } = cross.sync("git", ["--version"]);
 
@@ -149,7 +150,7 @@ async function main() {
     }
     const hasPackageLock = existsSync(join(CWD, "package-lock.json"));
 
-    console.log(`\n${gray(" > Everything is okay ... Running update in one second.")}\n`);
+    console.log(`${gray(" > Everything is okay ... Running update in one second.")}\n`);
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Run updates!
