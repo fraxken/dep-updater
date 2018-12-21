@@ -21,6 +21,11 @@ const STDIO = { stdio: "inherit" };
 // VARIABLES
 const gitTemplate = taggedString`"chore(package): update ${"name"} from ${"from"} to ${"to"}"`;
 
+/**
+ * @async
+ * @func main
+ * @returns {Promise<void>}
+ */
 async function main() {
     console.log(`\n${gray(" > npm outdated --json")}`);
     const { stdout } = cross.sync("npm", ["outdated", "--json"]);
@@ -130,4 +135,4 @@ async function main() {
         }
     }
 }
-main().catch(console.erorr);
+main().catch(console.error);
