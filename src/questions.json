@@ -7,11 +7,16 @@
     "run_test": {
         "type": "confirm",
         "name": "runTest",
-        "message": "Do you want to run local test after each update ?"
+        "message": "Do you want to run local npm test script after each update ?"
     },
     "git_commit": {
         "type": "confirm",
         "name": "gitCommit",
         "message": "Do you want to commit after each package update ?"
+    },
+    "git_template": {
+        "type": "confirm",
+        "name": "useDefaultTemplate",
+        "message": "Do you want to use the default commit template ?"
     }
 }
