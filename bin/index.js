@@ -77,7 +77,6 @@ async function main() {
     ]);
 
     // Verify test and git on the local root/system
-    console.log(`\n${gray(" > Verify git, npm and test scripts")}\n`);
     if (gitCommit) {
         const { signal } = cross.sync("git", ["--version"]);
 
