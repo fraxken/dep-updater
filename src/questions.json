@@ -1,0 +1,17 @@
+{
+    "update_package": {
+        "type": "confirm",
+        "name": "update",
+        "message": "Do you want to update the package ?"
+    },
+    "run_test": {
+        "type": "confirm",
+        "name": "runTest",
+        "message": "Do you want to run local test after each update ?"
+    },
+    "git_commit": {
+        "type": "confirm",
+        "name": "gitCommit",
+        "message": "Do you want to commit after each package update ?"
+    }
+}
