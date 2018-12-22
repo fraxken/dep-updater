@@ -6,6 +6,12 @@
 const { green, cyan } = require("kleur");
 const cross = require("cross-spawn");
 
+// CONSTANTS
+const KIND_FLAG = new Map([
+    ["Dependencies", "-P"],
+    ["DevDependencies", "-D"]
+]);
+
 /**
  * @exports npm/update
  * @func update

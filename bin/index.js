@@ -20,10 +20,6 @@ const questions = require("../src/questions.json");
 // CONSTANTS
 const STDIO = { stdio: "inherit" };
 const CWD = process.cwd();
-const KIND_FLAG = new Map([
-    ["Dependencies", "-P"],
-    ["DevDependencies", "-D"]
-]);
 
 // VARIABLES
 const readFileAsync = promisify(readFile);
@@ -80,7 +76,7 @@ async function main() {
 
     // Exit if there is no package to update
     if (packageToUpdate.length === 0) {
-        console.log("\nNo package to update.. exiting process");
+        console.log(`\nNo package to update.. ${red("exiting process")}`);
         process.exit(0);
     }
 
@@ -101,9 +97,7 @@ async function main() {
     }
 
     if (runTest) {
-        const { stdout } = cross.sync("npm", ["run", "--json"]);
-        const scripts = JSON.parse(stdout.toString());
-
+        const scripts = localPackage.scripts || {};
         strictEqual(Reflect.has(scripts, "test"), true, new Error("unable to found npm test script"));
         console.log("👍 npm test script must exist");
     }
@@ -125,6 +119,7 @@ async function main() {
             }
             catch (error) {
                 console.log(red("An Error occured while executing tests!"));
+                console.log("Rollback to previous version!");
                 rollback(pkg, hasPackageLock);
 
                 continue;
@@ -139,5 +134,7 @@ async function main() {
             cross.sync("git", ["commit", "-m", commitMsg]);
         }
     }
+
+    console.log("\nAll packages updated !\n");
 }
 main().catch(console.error);
