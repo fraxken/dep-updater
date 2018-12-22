@@ -14,6 +14,7 @@ const inquirer = require("inquirer");
 
 // Require Internal Dependencies
 const { parseOutDatedDependencies, taggedString, findPkgKind } = require("../src/utils");
+const { update, rollback } = require("../src/npm");
 const questions = require("../src/questions.json");
 
 // CONSTANTS
@@ -27,48 +28,6 @@ const KIND_FLAG = new Map([
 // VARIABLES
 const readFileAsync = promisify(readFile);
 const gitTemplate = taggedString`"chore(package): update ${"name"} from ${"from"} to ${"to"}"`;
-
-/**
- * @func npmInstall
- * @param {Depup.Dependencies} pkg package to install
- * @param {Boolean} [hasPackageLock=false] define is package can be installed with ci
- * @returns {void}
- */
-function npmInstall(pkg, hasPackageLock = false) {
-    const kind = KIND_FLAG.get(pkg.kind);
-
-    if (pkg.updateTo === pkg.wanted) {
-        console.log(` > npm update ${green(pkg.name)} ${kind}`);
-        cross.sync("npm", ["update", pkg.name, kind]);
-    }
-    else {
-        console.log(` > npm remove ${green(pkg.name)} ${kind}`);
-        cross.sync("npm", ["remove", pkg.name, kind]);
-
-        const completePackageName = `${green(pkg.name)}@${cyan(pkg.updateTo)}`;
-        const installCMD = hasPackageLock ? "ci" : "install";
-        console.log(` > npm ${installCMD} ${completePackageName} ${kind}`);
-        cross.sync("npm", [installCMD, completePackageName, kind]);
-    }
-}
-
-/**
- * @func npmRollback
- * @param {Depup.Dependencies} pkg package to install
- * @param {Boolean} [hasPackageLock=false] define is package can be installed with ci
- * @returns {void}
- */
-function npmRollback(pkg, hasPackageLock = false) {
-    const kind = KIND_FLAG.get(pkg.kind);
-
-    console.log(` > npm remove ${green(pkg.name)} ${kind}`);
-    cross.sync("npm", ["remove", pkg.name, kind]);
-
-    const completePackageName = `${green(pkg.name)}@${cyan(pkg.current)}`;
-    const installCMD = hasPackageLock ? "ci" : "install";
-    console.log(` > npm ${installCMD} ${completePackageName} ${kind}`);
-    cross.sync("npm", [installCMD, completePackageName, kind]);
-}
 
 /**
  * @async
@@ -156,7 +115,7 @@ async function main() {
     // Run updates!
     for (const pkg of packageToUpdate) {
         console.log(`\nupdating ${bold(green(pkg.name))} (${yellow(pkg.current)} -> ${cyan(pkg.updateTo)})`);
-        npmInstall(pkg, hasPackageLock);
+        update(pkg, hasPackageLock);
 
         if (runTest) {
             console.log(" > npm test");
@@ -166,7 +125,7 @@ async function main() {
             }
             catch (error) {
                 console.log(red("An Error occured while executing tests!"));
-                npmRollback(pkg, hasPackageLock);
+                rollback(pkg, hasPackageLock);
 
                 continue;
             }
