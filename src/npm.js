@@ -22,10 +22,9 @@ const KIND_FLAG = new Map([
  * @desc update a given package
  * @memberof npm#
  * @param {Depup.Dependencies} pkg package to install
- * @param {Boolean} [hasPackageLock=false] define is package can be installed with ci
  * @returns {void}
  */
-function update(pkg, hasPackageLock = false) {
+function update(pkg) {
     const kind = KIND_FLAG.get(pkg.kind);
 
     if (pkg.updateTo === pkg.wanted) {
@@ -37,9 +36,8 @@ function update(pkg, hasPackageLock = false) {
         spawnSync(NPM_CMD, ["remove", pkg.name, kind], SPAWN_OPTIONS);
 
         const completePackageName = `${green(pkg.name)}@${cyan(pkg.updateTo)}`;
-        const installCMD = hasPackageLock ? "ci" : "install";
-        console.log(` > npm ${installCMD} ${completePackageName} ${kind}`);
-        spawnSync(NPM_CMD, [installCMD, completePackageName, kind], SPAWN_OPTIONS);
+        console.log(` > npm install ${completePackageName} ${kind}`);
+        spawnSync(NPM_CMD, ["install", completePackageName, kind], SPAWN_OPTIONS);
     }
 }
 
@@ -49,19 +47,17 @@ function update(pkg, hasPackageLock = false) {
  * @desc Rollback package installation
  * @memberof npm#
  * @param {Depup.Dependencies} pkg package to install
- * @param {Boolean} [hasPackageLock=false] define is package can be installed with ci
  * @returns {void}
  */
-function rollback(pkg, hasPackageLock = false) {
+function rollback(pkg) {
     const kind = KIND_FLAG.get(pkg.kind);
 
     console.log(` > npm remove ${green(pkg.name)} ${kind}`);
     spawnSync(NPM_CMD, ["remove", pkg.name, kind], SPAWN_OPTIONS);
 
     const completePackageName = `${green(pkg.name)}@${cyan(pkg.current)}`;
-    const installCMD = hasPackageLock ? "ci" : "install";
-    console.log(` > npm ${installCMD} ${completePackageName} ${kind}`);
-    spawnSync(NPM_CMD, [installCMD, completePackageName, kind], SPAWN_OPTIONS);
+    console.log(` > npm install ${completePackageName} ${kind}`);
+    spawnSync(NPM_CMD, ["install", completePackageName, kind], SPAWN_OPTIONS);
 }
 
 module.exports = { update, rollback };

@@ -118,16 +118,13 @@ async function main() {
         process.exit(0);
     }
 
-    const hasPackageLock = existsSync(join(CWD, "package-lock.json"));
-    console.log(hasPackageLock ? "✔️ package-lock.json" : "❌ No package-lock.json");
-
     console.log(`\n${gray(" > Everything is okay ... Running update in one second.")}\n`);
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Run updates!
     for (const pkg of packageToUpdate) {
         console.log(`\nupdating ${bold(green(pkg.name))} (${yellow(pkg.current)} -> ${cyan(pkg.updateTo)})`);
-        update(pkg, hasPackageLock);
+        update(pkg);
 
         if (runTest) {
             console.log(" > npm test");
@@ -140,7 +137,7 @@ async function main() {
             catch (error) {
                 console.log(red("An Error occured while executing tests!"));
                 console.log("Rollback to previous version!");
-                rollback(pkg, hasPackageLock);
+                rollback(pkg);
 
                 continue;
             }
