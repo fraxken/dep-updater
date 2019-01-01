@@ -5,7 +5,7 @@ require("make-promises-safe");
 const { strictEqual } = require("assert").strict;
 const { join } = require("path");
 const { promisify } = require("util");
-const { readFile } = require("fs");
+const { readFile, existsSync } = require("fs");
 const { spawnSync } = require("child_process");
 
 // Require Third-party Dependencies
@@ -32,6 +32,11 @@ const gitTemplate = taggedString`"chore: update ${"name"} (${"from"} to ${"to"})
  * @returns {Promise<void>}
  */
 async function main() {
+    if (!existsSync(join(CWD, "package.json"))) {
+        console.log(red(`\n > No package.json found on current working dir: ${yellow(CWD)}\n`));
+        process.exit(0);
+    }
+
     console.log(`\n${gray(" > npm outdated --json")}`);
     const { stdout } = spawnSync(`npm${EXEC_SUFFIX ? ".cmd" : ""}`, ["outdated", "--json"], SPAWN_OPTIONS);
     const outdated = parseOutDatedDependencies(stdout);
