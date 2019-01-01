@@ -13,18 +13,18 @@ const { gray, green, bold, yellow, cyan, red } = require("kleur");
 const inquirer = require("inquirer");
 
 // Require Internal Dependencies
-const { parseOutDatedDependencies, taggedString, findPkgKind, formatCmd } = require("../src/utils");
+const { parseOutDatedDependencies, taggedString, findPkgKind } = require("../src/utils");
 const { update, rollback } = require("../src/npm");
 const questions = require("../src/questions.json");
 
 // CONSTANTS
-const STDIO = { stdio: "inherit" };
 const CWD = process.cwd();
 const SPAWN_OPTIONS = { cwd: CWD, env: process.env };
+const EXEC_SUFFIX = process.platform === "win32";
 
 // VARIABLES
 const readFileAsync = promisify(readFile);
-const gitTemplate = taggedString`"chore: up ${"name"} (${"from"} to ${"to"})"`;
+const gitTemplate = taggedString`"chore: update ${"name"} (${"from"} to ${"to"})"`;
 
 /**
  * @async
@@ -33,7 +33,7 @@ const gitTemplate = taggedString`"chore: up ${"name"} (${"from"} to ${"to"})"`;
  */
 async function main() {
     console.log(`\n${gray(" > npm outdated --json")}`);
-    const { stdout } = spawnSync(formatCmd("npm outdated --json"), SPAWN_OPTIONS);
+    const { stdout } = spawnSync(`npm${EXEC_SUFFIX ? ".cmd" : ""}`, ["outdated", "--json"], SPAWN_OPTIONS);
     const outdated = parseOutDatedDependencies(stdout);
 
     // Read local package.json
@@ -90,21 +90,38 @@ async function main() {
 
     // Verify test and git on the local root/system
     console.log("");
+    let stopScript = false;
     if (gitCommit) {
-        const { signal } = spawnSync(formatCmd("git --version"), SPAWN_OPTIONS);
+        const { signal, status } = spawnSync("git", ["--version"], SPAWN_OPTIONS);
 
-        strictEqual(signal, null, new Error("git command not found!"));
-        console.log("👍 git executable is accessible");
+        if (signal !== null || status !== 0) {
+            console.log("⛔️ Unable to retrieve local git executable version");
+            stopScript = true;
+        }
+        else {
+            console.log("✔️ git executable is accessible");
+        }
     }
 
     if (runTest) {
         const scripts = localPackage.scripts || {};
-        strictEqual(Reflect.has(scripts, "test"), true, new Error("unable to found npm test script"));
-        console.log("👍 npm test script must exist");
+        if (Reflect.has(scripts, "test")) {
+            console.log("✔️ npm test script must exist");
+        }
+        else {
+            console.log("⛔️ Unable to found test script in local package.json");
+            stopScript = true;
+        }
     }
-    const hasPackageLock = existsSync(join(CWD, "package-lock.json"));
+    if (stopScript) {
+        console.log("");
+        process.exit(0);
+    }
 
-    console.log(`${gray(" > Everything is okay ... Running update in one second.")}\n`);
+    const hasPackageLock = existsSync(join(CWD, "package-lock.json"));
+    console.log(hasPackageLock ? "✔️ package-lock.json" : "❌ No package-lock.json");
+
+    console.log(`\n${gray(" > Everything is okay ... Running update in one second.")}\n`);
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Run updates!
@@ -115,8 +132,10 @@ async function main() {
         if (runTest) {
             console.log(" > npm test");
             try {
-                const { signal } = spawnSync(formatCmd("npm test"), { ...SPAWN_OPTIONS, ...STDIO });
+                const { signal, status } = spawnSync(`npm${EXEC_SUFFIX ? ".cmd" : ""}`,
+                    ["test"], { ...SPAWN_OPTIONS, stdio: "inherit" });
                 strictEqual(signal, null);
+                strictEqual(status, 0);
             }
             catch (error) {
                 console.log(red("An Error occured while executing tests!"));
@@ -128,11 +147,12 @@ async function main() {
         }
 
         if (gitCommit) {
+            // TODO: truncate pkg.name
             const commitMsg = gitTemplate({ name: pkg.name, from: pkg.current, to: pkg.updateTo });
             console.log(` > git commit -m ${yellow(commitMsg)}`);
 
-            spawnSync(formatCmd("git add package.json"), SPAWN_OPTIONS);
-            spawnSync(formatCmd(`git commit -m ${commitMsg}`), SPAWN_OPTIONS);
+            spawnSync("git", ["add", "package.json"], SPAWN_OPTIONS);
+            spawnSync("git", ["commit", "-m", commitMsg], SPAWN_OPTIONS);
         }
     }
 

@@ -8,11 +8,9 @@ const { spawnSync } = require("child_process");
 // Require Third-party Package
 const { green, cyan } = require("kleur");
 
-// Require Internal Dependencies
-const { formatCmd } = require("./utils");
-
 // CONSTANTS
 const SPAWN_OPTIONS = { cwd: process.cwd(), env: process.env };
+const NPM_CMD = `npm${process.platform === "win32" ? ".cmd" : ""}`;
 const KIND_FLAG = new Map([
     ["Dependencies", "-P"],
     ["DevDependencies", "-D"]
@@ -32,16 +30,16 @@ function update(pkg, hasPackageLock = false) {
 
     if (pkg.updateTo === pkg.wanted) {
         console.log(` > npm update ${green(pkg.name)} ${kind}`);
-        spawnSync(formatCmd(`npm update ${pkg.name} ${kind}`), SPAWN_OPTIONS);
+        spawnSync(NPM_CMD, ["update", pkg.name, kind], SPAWN_OPTIONS);
     }
     else {
         console.log(` > npm remove ${green(pkg.name)} ${kind}`);
-        spawnSync(formatCmd(`npm remove ${pkg.name} ${kind}`), SPAWN_OPTIONS);
+        spawnSync(NPM_CMD, ["remove", pkg.name, kind], SPAWN_OPTIONS);
 
         const completePackageName = `${green(pkg.name)}@${cyan(pkg.updateTo)}`;
         const installCMD = hasPackageLock ? "ci" : "install";
         console.log(` > npm ${installCMD} ${completePackageName} ${kind}`);
-        spawnSync(formatCmd(`npm ${installCMD} ${completePackageName} ${kind}`), SPAWN_OPTIONS);
+        spawnSync(NPM_CMD, [installCMD, completePackageName, kind], SPAWN_OPTIONS);
     }
 }
 
@@ -58,12 +56,12 @@ function rollback(pkg, hasPackageLock = false) {
     const kind = KIND_FLAG.get(pkg.kind);
 
     console.log(` > npm remove ${green(pkg.name)} ${kind}`);
-    spawnSync(formatCmd(`npm remove ${pkg.name} ${kind}`), SPAWN_OPTIONS);
+    spawnSync(NPM_CMD, ["remove", pkg.name, kind], SPAWN_OPTIONS);
 
     const completePackageName = `${green(pkg.name)}@${cyan(pkg.current)}`;
     const installCMD = hasPackageLock ? "ci" : "install";
     console.log(` > npm ${installCMD} ${completePackageName} ${kind}`);
-    spawnSync(formatCmd(`npm ${installCMD} ${completePackageName} ${kind}`), SPAWN_OPTIONS);
+    spawnSync(NPM_CMD, [installCMD, completePackageName, kind], SPAWN_OPTIONS);
 }
 
 module.exports = { update, rollback };

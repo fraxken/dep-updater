@@ -78,7 +78,7 @@ function findPkgKind(packageJSON, pkg) {
  * @returns {String}
  */
 function formatCmd(cmd) {
-    return `${process.platform === "win32" ? "cmd /c" : ""} ${cmd}`;
+    return `${process.platform === "win32" ? ".cmd" : ""} ${cmd}`;
 }
 
 module.exports = {
