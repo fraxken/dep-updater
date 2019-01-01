@@ -34,7 +34,7 @@
         "@types/es6-shim": "^0.31.39",
         "@types/node": "^10.12.18",
         "cross-env": "^5.2.0",
-        "eslint": "^5.10.0",
+        "eslint": "^5.11.1",
         "husky": "^1.3.0",
         "jsdoc": "^3.5.5",
         "pkg-ok": "^2.3.1"
