@@ -12,8 +12,12 @@
         "url": "git+https://github.com/fraxken/dep-updater.git"
     },
     "keywords": [
-        "SlimIO",
-        "monitoring"
+        "npm",
+        "dependencies",
+        "updater",
+        "management",
+        "upgrade",
+        "autoupdate"
     ],
     "author": "SlimIO",
     "license": "MIT",
