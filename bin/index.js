@@ -5,7 +5,7 @@ require("make-promises-safe");
 const { strictEqual } = require("assert").strict;
 const { join } = require("path");
 const { promisify } = require("util");
-const { existsSync, readFile } = require("fs");
+const { readFile } = require("fs");
 const { spawnSync } = require("child_process");
 
 // Require Third-party Dependencies
