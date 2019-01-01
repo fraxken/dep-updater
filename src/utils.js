@@ -67,6 +67,11 @@ function findPkgKind(packageJSON, pkg) {
         return "DevDependencies";
     }
 
+    const optionalDependencies = packageJSON.optionalDependencies || {};
+    if (Reflect.has(optionalDependencies, pkg.name)) {
+        return "OptDependencies";
+    }
+
     return "Dependencies";
 }
 

@@ -13,7 +13,8 @@ const SPAWN_OPTIONS = { cwd: process.cwd(), env: process.env };
 const NPM_CMD = `npm${process.platform === "win32" ? ".cmd" : ""}`;
 const KIND_FLAG = new Map([
     ["Dependencies", "-P"],
-    ["DevDependencies", "-D"]
+    ["DevDependencies", "-D"],
+    ["OptDependencies", "-O"]
 ]);
 
 /**

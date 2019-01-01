@@ -35,4 +35,3 @@ $ depup
 - Add argv option to change the default git template.
 - Add argv option to force test and commit (avoid option asking).
 - Add argv option to force updateAll (or updateWanted).
-- Support optional and bundled dependencies kind.
