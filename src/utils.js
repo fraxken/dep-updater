@@ -70,8 +70,20 @@ function findPkgKind(packageJSON, pkg) {
     return "Dependencies";
 }
 
+/**
+ * @exports utils/formatCmd
+ * @func formatCmd
+ * @memberof Utils#
+ * @param {!String} cmd cmd
+ * @returns {String}
+ */
+function formatCmd(cmd) {
+    return `${process.platform === "win32" ? "cmd /c" : ""} ${cmd}`;
+}
+
 module.exports = {
     taggedString,
     parseOutDatedDependencies,
-    findPkgKind
+    findPkgKind,
+    formatCmd
 };

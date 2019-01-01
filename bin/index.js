@@ -6,24 +6,25 @@ const { strictEqual } = require("assert").strict;
 const { join } = require("path");
 const { promisify } = require("util");
 const { existsSync, readFile } = require("fs");
+const { spawnSync } = require("child_process");
 
 // Require Third-party Dependencies
 const { gray, green, bold, yellow, cyan, red } = require("kleur");
-const cross = require("cross-spawn");
 const inquirer = require("inquirer");
 
 // Require Internal Dependencies
-const { parseOutDatedDependencies, taggedString, findPkgKind } = require("../src/utils");
+const { parseOutDatedDependencies, taggedString, findPkgKind, formatCmd } = require("../src/utils");
 const { update, rollback } = require("../src/npm");
 const questions = require("../src/questions.json");
 
 // CONSTANTS
 const STDIO = { stdio: "inherit" };
 const CWD = process.cwd();
+const SPAWN_OPTIONS = { cwd: CWD, env: process.env };
 
 // VARIABLES
 const readFileAsync = promisify(readFile);
-const gitTemplate = taggedString`"chore(package): update ${"name"} from ${"from"} to ${"to"}"`;
+const gitTemplate = taggedString`"chore: up ${"name"} (${"from"} to ${"to"})"`;
 
 /**
  * @async
@@ -32,7 +33,7 @@ const gitTemplate = taggedString`"chore(package): update ${"name"} from ${"from"
  */
 async function main() {
     console.log(`\n${gray(" > npm outdated --json")}`);
-    const { stdout } = cross.sync("npm", ["outdated", "--json"]);
+    const { stdout } = spawnSync(formatCmd("npm outdated --json"), SPAWN_OPTIONS);
     const outdated = parseOutDatedDependencies(stdout);
 
     // Read local package.json
@@ -90,7 +91,7 @@ async function main() {
     // Verify test and git on the local root/system
     console.log("");
     if (gitCommit) {
-        const { signal } = cross.sync("git", ["--version"]);
+        const { signal } = spawnSync(formatCmd("git --version"), SPAWN_OPTIONS);
 
         strictEqual(signal, null, new Error("git command not found!"));
         console.log("👍 git executable is accessible");
@@ -114,7 +115,7 @@ async function main() {
         if (runTest) {
             console.log(" > npm test");
             try {
-                const { signal } = cross.sync("npm", ["test"], STDIO);
+                const { signal } = spawnSync(formatCmd("npm test"), { ...SPAWN_OPTIONS, ...STDIO });
                 strictEqual(signal, null);
             }
             catch (error) {
@@ -130,8 +131,8 @@ async function main() {
             const commitMsg = gitTemplate({ name: pkg.name, from: pkg.current, to: pkg.updateTo });
             console.log(` > git commit -m ${yellow(commitMsg)}`);
 
-            cross.sync("git", ["add", "package.json"]);
-            cross.sync("git", ["commit", "-m", commitMsg]);
+            spawnSync(formatCmd("git add package.json"), SPAWN_OPTIONS);
+            spawnSync(formatCmd(`git commit -m ${commitMsg}`), SPAWN_OPTIONS);
         }
     }
 
