@@ -29,9 +29,12 @@ $ cd yourProject
 $ depup
 ```
 
-## Roadmap
+> **warning**: Be sure to only run the binary when you have no unstaged modification in your package.json
+
+## Roadmap v1.0.0
 - [BUG] Sometimes pkg.current is an Object !
 - Detect if the terminal support emoji or not.
+- Improve error handling from npm commands (update and delete).
 - Add argv option to change the default git template.
 - Add argv option to force test and commit (avoid option asking).
 - Add argv option to force updateAll (or updateWanted).
