@@ -2,7 +2,7 @@
     "name": "dep-updater",
     "version": "1.0.0",
     "description": "npm Dependencies Updater",
-    "main": "index.js",
+    "main": "./bin/index.js",
     "scripts": {
         "prepublishOnly": "pkg-ok",
         "doc": "jsdoc -c ./jsdoc.json -r -R ./README.md -P ./package.json --verbose"
