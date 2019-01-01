@@ -144,8 +144,8 @@ async function main() {
         }
 
         if (gitCommit) {
-            // TODO: truncate pkg.name
-            const commitMsg = gitTemplate({ name: pkg.name, from: pkg.current, to: pkg.updateTo });
+            const name = pkg.name.length > 40 ? `${pkg.name.substr(0, 37)}...` : pkg.name;
+            const commitMsg = gitTemplate({ name, from: pkg.current, to: pkg.updateTo });
             console.log(` > git commit -m ${yellow(commitMsg)}`);
 
             spawnSync("git", ["add", "package.json"], SPAWN_OPTIONS);
