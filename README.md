@@ -10,7 +10,6 @@ npm Dependencies Updater.
 - Upgrade package for you (even for breaking release).
 - Run test after each upgrade (and rollback if test fail).
 - Create a git commit for each update
-- Detect package lock and use `npm ci` instead of `npm install`
 
 ## Getting Started
 
@@ -31,6 +30,7 @@ $ depup
 ```
 
 ## Roadmap
+- [BUG] Sometimes pkg.current is an Object !
 - Detect if the terminal support emoji or not.
 - Add argv option to change the default git template.
 - Add argv option to force test and commit (avoid option asking).
