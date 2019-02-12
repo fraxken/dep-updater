@@ -28,7 +28,7 @@
     "dependencies": {
         "inquirer": "^6.2.2",
         "isomorphic-git": "^0.51.7",
-        "kleur": "^3.0.1",
+        "kleur": "^3.0.2",
         "make-promises-safe": "^4.0.0"
     },
     "devDependencies": {
