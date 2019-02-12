@@ -5,12 +5,15 @@ require("make-promises-safe");
 const { strictEqual } = require("assert").strict;
 const { join } = require("path");
 const { promisify } = require("util");
-const { readFile, existsSync } = require("fs");
+const fs = require("fs");
 const { spawnSync } = require("child_process");
+const { readFile, existsSync } = fs;
 
 // Require Third-party Dependencies
 const { gray, green, bold, yellow, cyan, red } = require("kleur");
 const inquirer = require("inquirer");
+const git = require("isomorphic-git");
+git.plugins.set("fs", fs);
 
 // Require Internal Dependencies
 const { parseOutDatedDependencies, taggedString, findPkgKind } = require("../src/utils");
@@ -153,8 +156,8 @@ async function main() {
             const commitMsg = gitTemplate({ name, from: pkg.current, to: pkg.updateTo });
             console.log(` > git commit -m ${yellow(commitMsg)}`);
 
-            spawnSync("git", ["add", "package.json"], SPAWN_OPTIONS);
-            spawnSync("git", ["commit", "-m", commitMsg], SPAWN_OPTIONS);
+            await git.add({ dir: CWD, filepath: "package.json" });
+            await git.commit({ dir: CWD, message: commitMsg });
         }
     }
 
