@@ -22,12 +22,12 @@ const questions = require("../src/questions.json");
 
 // CONSTANTS
 const CWD = process.cwd();
-const SPAWN_OPTIONS = { cwd: CWD, env: process.env, stdio: "inherit" };
+const SPAWN_OPTIONS = { cwd: CWD, env: process.env };
 const EXEC_SUFFIX = process.platform === "win32";
 
 // VARIABLES
 const readFileAsync = promisify(readFile);
-const gitTemplate = taggedString`"chore: update ${"name"} (${"from"} to ${"to"})"`;
+const gitTemplate = taggedString`chore: update ${"name"} (${"from"} to ${"to"})`;
 
 /**
  * @async
@@ -99,16 +99,15 @@ async function main() {
     // Verify test and git on the local root/system
     console.log("");
     let stopScript = false;
-    if (gitCommit) {
-        const { signal, status } = spawnSync("git", ["--version"], SPAWN_OPTIONS);
+    let gitUsername;
+    let gitEmail;
 
-        if (signal !== null || status !== 0) {
-            console.log("⛔️ Unable to retrieve local git executable version");
-            stopScript = true;
-        }
-        else {
-            console.log("✔️ git executable is accessible");
-        }
+    if (gitCommit) {
+        const { stdout: username } = spawnSync("git", ["config", "--global", "user.name"], SPAWN_OPTIONS);
+        gitUsername = username.toString().replace(/(\r\n|\n|\r)/gm, "");
+
+        const { stdout: useremail } = spawnSync("git", ["config", "--global", "user.email"], SPAWN_OPTIONS);
+        gitEmail = useremail.toString().replace(/(\r\n|\n|\r)/gm, "");
     }
 
     if (runTest) {
@@ -157,7 +156,7 @@ async function main() {
             console.log(` > git commit -m ${yellow(commitMsg)}`);
 
             await git.add({ dir: CWD, filepath: "package.json" });
-            await git.commit({ dir: CWD, message: commitMsg });
+            await git.commit({ dir: CWD, message: commitMsg, author: { email: gitEmail, name: gitUsername } });
         }
     }
 
