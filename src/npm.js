@@ -9,7 +9,7 @@ const { spawnSync } = require("child_process");
 const { green, cyan } = require("kleur");
 
 // CONSTANTS
-const SPAWN_OPTIONS = { cwd: process.cwd(), env: process.env };
+const SPAWN_OPTIONS = { cwd: process.cwd(), env: process.env, stdio: "inherit" };
 const NPM_CMD = `npm${process.platform === "win32" ? ".cmd" : ""}`;
 const KIND_FLAG = new Map([
     ["Dependencies", "-P"],

@@ -19,7 +19,7 @@ const questions = require("../src/questions.json");
 
 // CONSTANTS
 const CWD = process.cwd();
-const SPAWN_OPTIONS = { cwd: CWD, env: process.env };
+const SPAWN_OPTIONS = { cwd: CWD, env: process.env, stdio: "inherit" };
 const EXEC_SUFFIX = process.platform === "win32";
 
 // VARIABLES
