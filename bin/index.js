@@ -131,7 +131,11 @@ async function main() {
     // Run updates!
     for (const pkg of packageToUpdate) {
         console.log(`\nupdating ${bold(green(pkg.name))} (${yellow(pkg.current)} -> ${cyan(pkg.updateTo)})`);
-        update(pkg);
+        const status = update(pkg);
+        if (status !== 0) {
+            console.log(red(`\n > Failed to update ${pkg.name} package!`));
+            continue;
+        }
 
         if (runTest) {
             console.log(" > npm test");

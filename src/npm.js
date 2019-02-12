@@ -30,16 +30,21 @@ function update(pkg) {
 
     if (pkg.updateTo === pkg.wanted) {
         console.log(` > npm update ${green(pkg.name)} ${kind}`);
-        spawnSync(NPM_CMD, ["update", pkg.name, kind], SPAWN_OPTIONS);
-    }
-    else {
-        console.log(` > npm remove ${green(pkg.name)} ${kind}`);
-        spawnSync(NPM_CMD, ["remove", pkg.name, kind], SPAWN_OPTIONS);
+        const { status } = spawnSync(NPM_CMD, ["update", pkg.name, kind], SPAWN_OPTIONS);
 
-        const completePackageName = `${green(pkg.name)}@${cyan(pkg.updateTo)}`;
-        console.log(` > npm install ${completePackageName} ${kind}`);
-        spawnSync(NPM_CMD, ["install", completePackageName, kind], SPAWN_OPTIONS);
+        return status;
     }
+
+    console.log(` > npm remove ${green(pkg.name)} ${kind}`);
+    const { status } = spawnSync(NPM_CMD, ["remove", pkg.name, kind], SPAWN_OPTIONS);
+    if (status !== 0) {
+        return status;
+    }
+
+    const completePackageName = `${green(pkg.name)}@${cyan(pkg.updateTo)}`;
+    console.log(` > npm install ${completePackageName} ${kind}`);
+
+    return spawnSync(NPM_CMD, ["install", completePackageName, kind], SPAWN_OPTIONS).status;
 }
 
 /**
