@@ -41,8 +41,8 @@ function update(pkg) {
         return status;
     }
 
-    const completePackageName = `${green(pkg.name)}@${cyan(pkg.updateTo)}`;
-    console.log(` > npm install ${completePackageName} ${kind}`);
+    const completePackageName = `${pkg.name}@${pkg.updateTo}`;
+    console.log(` > npm install ${green(completePackageName)} ${kind}`);
 
     return spawnSync(NPM_CMD, ["install", completePackageName, kind], SPAWN_OPTIONS).status;
 }
