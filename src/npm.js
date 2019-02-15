@@ -23,7 +23,7 @@ const KIND_FLAG = new Map([
  * @desc update a given package
  * @memberof npm#
  * @param {Depup.Dependencies} pkg package to install
- * @returns {void}
+ * @returns {Object}
  */
 function update(pkg) {
     const kind = KIND_FLAG.get(pkg.kind);
@@ -32,19 +32,21 @@ function update(pkg) {
         console.log(` > npm update ${green(pkg.name)} ${kind}`);
         const { status } = spawnSync(NPM_CMD, ["update", pkg.name, kind], SPAWN_OPTIONS);
 
-        return status;
+        return { status, remove: false };
     }
 
     console.log(` > npm remove ${green(pkg.name)} ${kind}`);
     const { status } = spawnSync(NPM_CMD, ["remove", pkg.name, kind], SPAWN_OPTIONS);
     if (status !== 0) {
-        return status;
+        return { status, remove: false };
     }
 
     const completePackageName = `${pkg.name}@${pkg.updateTo}`;
     console.log(` > npm install ${green(completePackageName)} ${kind}`);
 
-    return spawnSync(NPM_CMD, ["install", completePackageName, kind], SPAWN_OPTIONS).status;
+    const { status: statusBis } = spawnSync(NPM_CMD, ["install", completePackageName, kind], SPAWN_OPTIONS);
+
+    return { status: statusBis, remove: true };
 }
 
 /**
@@ -53,16 +55,19 @@ function update(pkg) {
  * @desc Rollback package installation
  * @memberof npm#
  * @param {Depup.Dependencies} pkg package to install
+ * @param {Boolean} [remove=true] choose to remove first the package
  * @returns {void}
  */
-function rollback(pkg) {
+function rollback(pkg, remove = true) {
     const kind = KIND_FLAG.get(pkg.kind);
 
-    console.log(` > npm remove ${green(pkg.name)} ${kind}`);
-    spawnSync(NPM_CMD, ["remove", pkg.name, kind], SPAWN_OPTIONS);
+    if (remove) {
+        console.log(` > npm remove ${green(pkg.name)} ${kind}`);
+        spawnSync(NPM_CMD, ["remove", pkg.name, kind], SPAWN_OPTIONS);
+    }
 
-    const completePackageName = `${green(pkg.name)}@${cyan(pkg.current)}`;
-    console.log(` > npm install ${completePackageName} ${kind}`);
+    const completePackageName = `${pkg.name}@${pkg.current}`;
+    console.log(` > npm install ${green(completePackageName)} ${kind}`);
     spawnSync(NPM_CMD, ["install", completePackageName, kind], SPAWN_OPTIONS);
 }
 

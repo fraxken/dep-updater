@@ -70,6 +70,7 @@ async function main() {
             const { release } = await inquirer.prompt([{
                 type: "list",
                 name: "release",
+                message: "which release do you want ?",
                 choices: [
                     { name: `wanted (${yellow(pkg.wanted)})`, value: pkg.wanted },
                     { name: `latest (${yellow(pkg.latest)})`, value: pkg.latest }
@@ -131,9 +132,13 @@ async function main() {
     // Run updates!
     for (const pkg of packageToUpdate) {
         console.log(`\nupdating ${bold(green(pkg.name))} (${yellow(pkg.current)} -> ${cyan(pkg.updateTo)})`);
-        const status = update(pkg);
+        const { status, remove } = update(pkg);
         if (status !== 0) {
             console.log(red(`\n > Failed to update ${pkg.name} package!`));
+            if (remove) {
+                console.log(" > package has been removed, rollback installation");
+                rollback(pkg, false);
+            }
             continue;
         }
 
