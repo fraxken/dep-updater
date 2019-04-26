@@ -1,6 +1,6 @@
 {
     "name": "dep-updater",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "npm Dependencies Updater",
     "main": "./bin/index.js",
     "scripts": {
