@@ -45,6 +45,7 @@ async function main() {
     const outdated = parseOutDatedDependencies(stdout);
 
     // Read local package.json
+    const havePackageLock = existsSync(join(CWD, "package-lock.json"));
     const localPackage = JSON.parse(
         await readFileAsync(join(CWD, "package.json"), { encoding: "utf8" })
     );
@@ -165,6 +166,9 @@ async function main() {
             console.log(` > git commit -m ${yellow(commitMsg)}`);
 
             await git.add({ dir: CWD, filepath: "package.json" });
+            if (havePackageLock) {
+                await git.add({ dir: CWD, filepath: "package-lock.json" });
+            }
             await git.commit({ dir: CWD, message: commitMsg, author: { email: gitEmail, name: gitUsername } });
         }
     }
