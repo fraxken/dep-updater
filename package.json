@@ -29,7 +29,7 @@
         "inquirer": "^6.5.0",
         "isomorphic-git": "^0.55.6",
         "kleur": "^3.0.3",
-        "make-promises-safe": "^4.0.0"
+        "make-promises-safe": "^5.0.0"
     },
     "devDependencies": {
         "@commitlint/cli": "^8.1.0",
