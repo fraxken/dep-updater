@@ -25,6 +25,7 @@ const questions = require("../src/questions.json");
 const CWD = process.cwd();
 const SPAWN_OPTIONS = { cwd: CWD, env: process.env };
 const EXEC_SUFFIX = process.platform === "win32";
+const E_STAGES = new Set(["unmodified", "*unmodified", "added", "*added"]);
 
 // VARIABLES
 const readFileAsync = promisify(readFile);
@@ -49,7 +50,8 @@ async function main() {
 
     // Package.json must have no unstaged update
     const status = await git.status({ dir: CWD, filepath: "package.json" });
-    if (status !== "unmodified") {
+    if (!E_STAGES.has(status)) {
+        console.log(status);
         console.log(red().bold(`\n > Unstaged modification detected on ${yellow().bold("package.json")}\n`));
         process.exit(0);
     }
