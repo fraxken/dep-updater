@@ -26,7 +26,7 @@
     },
     "homepage": "https://github.com/fraxken/dep-updater#readme",
     "dependencies": {
-        "inquirer": "^6.2.2",
+        "inquirer": "^6.5.0",
         "isomorphic-git": "^0.51.7",
         "kleur": "^3.0.2",
         "make-promises-safe": "^4.0.0"
