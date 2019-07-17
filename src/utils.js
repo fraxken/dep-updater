@@ -1,13 +1,14 @@
 /**
  * @namespace Utils
  */
+"use strict";
 
 /**
  * @exports utils/taggedString
- * @func taggedString
+ * @function taggedString
  * @memberof Utils#
- * @desc Create a tagged String
- * @param {!String} chaines initial string
+ * @description Create a tagged String
+ * @param {!string} chaines initial string
  * @param {any[]} cles string keys
  * @returns {Function} Return clojure function to build the final string
  *
@@ -32,7 +33,7 @@ function taggedString(chaines, ...cles) {
 
 /**
  * @exports utils/parseOutDatedDependencies
- * @func parseOutDatedDependencies
+ * @function parseOutDatedDependencies
  * @memberof Utils#
  * @param {!Buffer} stdout stdout
  * @returns {Depup.Dependencies[]}
@@ -50,11 +51,11 @@ function parseOutDatedDependencies(stdout) {
 
 /**
  * @exports utils/findPkgKind
- * @func findPkgKind
+ * @function findPkgKind
  * @memberof Utils#
  * @param {*} packageJSON packageJSON
  * @param {Depup.Dependencies} pkg pkg
- * @returns {String}
+ * @returns {string}
  */
 function findPkgKind(packageJSON, pkg) {
     const dependencies = packageJSON.dependencies || {};

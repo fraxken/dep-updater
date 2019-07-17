@@ -1,6 +1,7 @@
 /**
  * @namespace npm
  */
+"use strict";
 
 // Require Node.js Dependencies
 const { spawnSync } = require("child_process");
@@ -19,11 +20,11 @@ const KIND_FLAG = new Map([
 
 /**
  * @exports npm/update
- * @func update
- * @desc update a given package
+ * @function update
+ * @description update a given package
  * @memberof npm#
  * @param {Depup.Dependencies} pkg package to install
- * @returns {Object}
+ * @returns {object}
  */
 function update(pkg) {
     const kind = KIND_FLAG.get(pkg.kind);
@@ -51,11 +52,11 @@ function update(pkg) {
 
 /**
  * @exports npm/rollback
- * @func rollback
- * @desc Rollback package installation
+ * @function rollback
+ * @description Rollback package installation
  * @memberof npm#
  * @param {Depup.Dependencies} pkg package to install
- * @param {Boolean} [remove=true] choose to remove first the package
+ * @param {boolean} [remove=true] choose to remove first the package
  * @returns {void}
  */
 function rollback(pkg, remove = true) {

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+"use strict";
 require("make-promises-safe");
 
 // Require Node.js Dependencies
@@ -31,7 +32,7 @@ const gitTemplate = taggedString`chore: update ${"name"} (${"from"} to ${"to"})`
 
 /**
  * @async
- * @func main
+ * @function main
  * @returns {Promise<void>}
  */
 async function main() {
