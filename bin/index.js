@@ -11,7 +11,7 @@ const { spawnSync } = require("child_process");
 const { readFile, existsSync } = fs;
 
 // Require Third-party Dependencies
-const { gray, green, bold, yellow, cyan, red } = require("kleur");
+const { gray, green, bold, yellow, cyan, red, white } = require("kleur");
 const inquirer = require("inquirer");
 const git = require("isomorphic-git");
 git.plugins.set("fs", fs);
@@ -37,19 +37,26 @@ const gitTemplate = taggedString`chore: update ${"name"} (${"from"} to ${"to"})`
  */
 async function main() {
     if (!existsSync(join(CWD, "package.json"))) {
-        console.log(red(`\n > No package.json found on current working dir: ${yellow(CWD)}\n`));
+        console.log(red().bold(`\n > No package.json found on current working dir: ${yellow().bold(CWD)}\n`));
         process.exit(0);
     }
-
-    console.log(`\n${gray(" > npm outdated --json")}`);
-    const { stdout } = spawnSync(`npm${EXEC_SUFFIX ? ".cmd" : ""}`, ["outdated", "--json"], SPAWN_OPTIONS);
-    const outdated = parseOutDatedDependencies(stdout);
 
     // Read local package.json
     const havePackageLock = existsSync(join(CWD, "package-lock.json"));
     const localPackage = JSON.parse(
         await readFileAsync(join(CWD, "package.json"), { encoding: "utf8" })
     );
+
+    // Package.json must have no unstaged update
+    const status = await git.status({ dir: CWD, filepath: "package.json" });
+    if (status !== "unmodified") {
+        console.log(red().bold(`\n > Unstaged modification detected on ${yellow().bold("package.json")}\n`));
+        process.exit(0);
+    }
+
+    console.log(`\n${gray().bold(" > npm outdated --json")}`);
+    const { stdout } = spawnSync(`npm${EXEC_SUFFIX ? ".cmd" : ""}`, ["outdated", "--json"], SPAWN_OPTIONS);
+    const outdated = parseOutDatedDependencies(stdout);
 
     // Define list of packages to update!
     const packageToUpdate = [];
@@ -59,7 +66,7 @@ async function main() {
         }
 
         const updateTo = pkg.wanted === pkg.current ? pkg.latest : pkg.wanted;
-        console.log(`\n${bold(green(pkg.name))} (${yellow(pkg.current)} -> ${cyan(updateTo)})`);
+        console.log(`\n${green().bold(pkg.name)} (${yellow().bold(pkg.current)} -> ${cyan().bold(updateTo)})`);
         const { update } = await inquirer.prompt([questions.update_package]);
         if (!update) {
             continue;
@@ -74,8 +81,8 @@ async function main() {
                 name: "release",
                 message: "which release do you want ?",
                 choices: [
-                    { name: `wanted (${yellow(pkg.wanted)})`, value: pkg.wanted },
-                    { name: `latest (${yellow(pkg.latest)})`, value: pkg.latest }
+                    { name: `wanted (${yellow().bold(pkg.wanted)})`, value: pkg.wanted },
+                    { name: `latest (${yellow().bold(pkg.latest)})`, value: pkg.latest }
                 ],
                 default: 0
             }]);
@@ -88,12 +95,12 @@ async function main() {
 
     // Exit if there is no package to update
     if (packageToUpdate.length === 0) {
-        console.log(`\nNo package to update.. ${red("exiting process")}`);
+        console.log(white().bold(`\nNo package to update.. ${red("exiting process")}`));
         process.exit(0);
     }
 
     // Configuration
-    console.log(`\n${gray(" > Configuration")}\n`);
+    console.log(`\n${gray().bold(" > Configuration")}\n`);
     const { runTest, gitCommit } = await inquirer.prompt([
         questions.run_test,
         questions.git_commit
