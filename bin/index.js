@@ -25,7 +25,6 @@ const questions = require("../src/questions.json");
 const CWD = process.cwd();
 const SPAWN_OPTIONS = { cwd: CWD, env: process.env };
 const EXEC_SUFFIX = process.platform === "win32";
-const E_STAGES = new Set(["unmodified", "*unmodified", "added", "*added"]);
 
 // VARIABLES
 const readFileAsync = promisify(readFile);
@@ -47,14 +46,6 @@ async function main() {
     const localPackage = JSON.parse(
         await readFileAsync(join(CWD, "package.json"), { encoding: "utf8" })
     );
-
-    // Package.json must have no unstaged update
-    const status = await git.status({ dir: CWD, filepath: "package.json" });
-    if (!E_STAGES.has(status)) {
-        console.log(status);
-        console.log(red().bold(`\n > Unstaged modification detected on ${yellow().bold("package.json")}\n`));
-        process.exit(0);
-    }
 
     console.log(`\n${gray().bold(" > npm outdated --json")}`);
     const { stdout } = spawnSync(`npm${EXEC_SUFFIX ? ".cmd" : ""}`, ["outdated", "--json"], SPAWN_OPTIONS);
