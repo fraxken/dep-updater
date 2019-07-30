@@ -49,7 +49,7 @@ async function main() {
 
     console.log(`\n${gray().bold(" > npm outdated --json")}`);
     const { stdout } = spawnSync(`npm${EXEC_SUFFIX ? ".cmd" : ""}`, ["outdated", "--json"], SPAWN_OPTIONS);
-    if (stdout.trim().length === 0) {
+    if (stdout.toString().trim().length === 0) {
         console.log("All dependancies are up-to-date");
         process.exit(0);
     }
