@@ -30,10 +30,10 @@
     },
     "homepage": "https://github.com/fraxken/dep-updater#readme",
     "dependencies": {
-        "inquirer": "^7.0.0",
         "isomorphic-git": "^0.67.2",
         "kleur": "^3.0.3",
-        "make-promises-safe": "^5.0.0"
+        "make-promises-safe": "^5.0.0",
+        "qoa": "^0.2.0"
     },
     "devDependencies": {
         "@commitlint/cli": "^8.1.0",

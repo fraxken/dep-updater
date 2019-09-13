@@ -1,22 +1,26 @@
 {
     "update_package": {
         "type": "confirm",
-        "name": "update",
-        "message": "Do you want to update the package ?"
+        "handle": "update",
+        "query": "Do you want to update the package ?",
+        "accept": "y"
     },
     "run_test": {
         "type": "confirm",
-        "name": "runTest",
-        "message": "Do you want to run local npm test script after each update ?"
+        "handle": "runTest",
+        "accept": "y",
+        "query": "Do you want to run local npm test script after each update ?"
     },
     "git_commit": {
         "type": "confirm",
-        "name": "gitCommit",
-        "message": "Do you want to commit after each package update ?"
+        "handle": "gitCommit",
+        "accept": "y",
+        "query": "Do you want to commit after each package update ?"
     },
     "git_template": {
         "type": "confirm",
-        "name": "useDefaultTemplate",
-        "message": "Do you want to use the default commit template ?"
+        "handle": "useDefaultTemplate",
+        "accept": "y",
+        "query": "Do you want to use the default commit template ?"
     }
 }

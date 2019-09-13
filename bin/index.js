@@ -12,7 +12,7 @@ const { readFile, existsSync } = fs;
 
 // Require Third-party Dependencies
 const { gray, green, bold, yellow, cyan, red, white } = require("kleur");
-const inquirer = require("inquirer");
+const qoa = require("qoa");
 const git = require("isomorphic-git");
 git.plugins.set("fs", fs);
 
@@ -63,8 +63,8 @@ async function main() {
         }
 
         const updateTo = pkg.wanted === pkg.current ? pkg.latest : pkg.wanted;
-        console.log(`\n${green().bold(pkg.name)} (${yellow().bold(pkg.current)} -> ${cyan().bold(updateTo)})`);
-        const { update } = await inquirer.prompt([questions.update_package]);
+        console.log(`\n${green().bold(pkg.name)} (${white().bold(pkg.current)} -> ${cyan().bold(updateTo)})`);
+        const { update } = await qoa.confirm(questions.update_package);
         if (!update) {
             continue;
         }
@@ -73,18 +73,18 @@ async function main() {
         pkg.updateTo = updateTo;
 
         if (pkg.wanted !== pkg.latest && pkg.current !== pkg.wanted) {
-            const { release } = await inquirer.prompt([{
-                type: "list",
-                name: "release",
-                message: "which release do you want ?",
-                choices: [
-                    { name: `wanted (${yellow().bold(pkg.wanted)})`, value: pkg.wanted },
-                    { name: `latest (${yellow().bold(pkg.latest)})`, value: pkg.latest }
-                ],
-                default: 0
-            }]);
+            console.log("");
+            const wanted = `wanted (${green().bold(pkg.wanted)})`;
+            const latest = `latest (${yellow().bold(pkg.latest)})`;
 
-            pkg.updateTo = release;
+            const { release } = await qoa.interactive({
+                type: "interactive",
+                handle: "release",
+                query: yellow().bold(`which release of ${white().bold(pkg.name)} do you want ?`),
+                menu: [wanted, latest]
+            });
+
+            pkg.updateTo = release === wanted ? pkg.wanted : pkg.latest;
         }
 
         packageToUpdate.push(pkg);
@@ -97,11 +97,9 @@ async function main() {
     }
 
     // Configuration
-    console.log(`\n${gray().bold(" > Configuration")}\n`);
-    const { runTest, gitCommit } = await inquirer.prompt([
-        questions.run_test,
-        questions.git_commit
-    ]);
+    console.log(`\n${gray().bold("------------------------------------------- ")}\n`);
+    const { runTest } = await qoa.confirm(questions.run_test);
+    const { gitCommit } = await qoa.confirm(questions.git_commit);
 
     // Verify test and git on the local root/system
     console.log("");
