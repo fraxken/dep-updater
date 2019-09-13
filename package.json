@@ -19,6 +19,10 @@
         "upgrade",
         "autoupdate"
     ],
+    "files": [
+        "bin",
+        "src"
+    ],
     "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
     "license": "MIT",
     "bugs": {
