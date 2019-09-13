@@ -1,8 +1,11 @@
 # dep-updater
-![V0.2.1](https://img.shields.io/badge/version-0.2.0-blue.svg)
+![stability-unstable](https://img.shields.io/badge/stability-unstable-yellow.svg)
+![version](https://img.shields.io/badge/dynamic/json.svg?url=https://raw.githubusercontent.com/fraxken/dep-updater/master/package.json&query=$.version&label=Version)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/fraxken/dep-updater/commit-activity)
 ![MIT](https://img.shields.io/github/license/mashape/apistatus.svg)
-![stability-unstable](https://img.shields.io/badge/stability-unstable-yellow.svg)
+![dep](https://img.shields.io/david/fraxken/dep-updater)
+![size](https://img.shields.io/bundlephobia/min/dep-updater)
+[![Known Vulnerabilities](https://snyk.io//test/github/fraxken/dep-updater/badge.svg?targetFile=package.json)](https://snyk.io//test/github/fraxken/dep-updater?targetFile=package.json)
 
 npm Dependencies Updater.
 
