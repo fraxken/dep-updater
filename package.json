@@ -26,8 +26,8 @@
     },
     "homepage": "https://github.com/fraxken/dep-updater#readme",
     "dependencies": {
-        "inquirer": "^6.5.0",
-        "isomorphic-git": "^0.55.6",
+        "inquirer": "^7.0.0",
+        "isomorphic-git": "^0.67.2",
         "kleur": "^3.0.3",
         "make-promises-safe": "^5.0.0"
     },
@@ -35,12 +35,12 @@
         "@commitlint/cli": "^8.1.0",
         "@commitlint/config-conventional": "^8.1.0",
         "@escommunity/minami": "^1.0.0",
-        "@slimio/eslint-config": "^3.0.2",
+        "@slimio/eslint-config": "^3.0.3",
         "@types/es6-shim": "^0.31.39",
-        "@types/node": "^12.6.6",
-        "cross-env": "^5.2.0",
-        "eslint": "^6.0.1",
-        "husky": "^3.0.0",
+        "@types/node": "^12.7.5",
+        "cross-env": "^5.2.1",
+        "eslint": "^6.3.0",
+        "husky": "^3.0.5",
         "jsdoc": "^3.6.3",
         "pkg-ok": "^2.3.1"
     },
