@@ -7,7 +7,7 @@
 const { spawnSync } = require("child_process");
 
 // Require Third-party Package
-const { green } = require("kleur");
+const { green } = require("kleur/colors");
 
 // CONSTANTS
 const SPAWN_OPTIONS = { cwd: process.cwd(), env: process.env, stdio: "inherit" };
