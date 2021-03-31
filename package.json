@@ -32,7 +32,7 @@
     "dependencies": {
         "isomorphic-git": "^0.67.2",
         "kleur": "^4.1.4",
-        "make-promises-safe": "^5.0.0",
+        "make-promises-safe": "^5.1.0",
         "qoa": "^0.2.0"
     },
     "devDependencies": {
