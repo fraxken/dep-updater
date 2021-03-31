@@ -36,16 +36,16 @@
         "qoa": "^0.2.0"
     },
     "devDependencies": {
-        "@commitlint/cli": "^8.1.0",
-        "@commitlint/config-conventional": "^8.1.0",
+        "@commitlint/cli": "^12.0.1",
+        "@commitlint/config-conventional": "^12.0.1",
         "@escommunity/minami": "^1.0.0",
-        "@slimio/eslint-config": "^3.0.3",
-        "@types/es6-shim": "^0.31.39",
-        "@types/node": "^12.7.5",
-        "cross-env": "^5.2.1",
-        "eslint": "^6.3.0",
+        "@slimio/eslint-config": "^4.1.0",
+        "@types/es6-shim": "^0.31.41",
+        "@types/node": "^14.14.37",
+        "cross-env": "^7.0.3",
+        "eslint": "^7.23.0",
         "husky": "^3.0.5",
-        "jsdoc": "^3.6.3",
+        "jsdoc": "^3.6.6",
         "pkg-ok": "^2.3.1"
     },
     "engines": {
