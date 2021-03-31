@@ -11,7 +11,7 @@ const { spawnSync } = require("child_process");
 const { readFile, existsSync } = fs;
 
 // Require Third-party Dependencies
-const { gray, green, bold, yellow, cyan, red, white } = require("kleur/colors");
+const { gray, green, bold, yellow, cyan, red, white } = require("kleur");
 const qoa = require("qoa");
 const git = require("isomorphic-git");
 git.plugins.set("fs", fs);
