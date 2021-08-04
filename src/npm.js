@@ -7,7 +7,7 @@
 const { spawnSync } = require("child_process");
 
 // Require Third-party Package
-const { green } = require("kleur/colors");
+const { green, bgBlue, yellow, white } = require("kleur");
 
 // CONSTANTS
 const SPAWN_OPTIONS = { cwd: process.cwd(), env: process.env, stdio: "inherit" };
@@ -29,21 +29,25 @@ const KIND_FLAG = new Map([
 function update(pkg) {
     const kind = KIND_FLAG.get(pkg.kind);
 
-    if (pkg.updateTo === pkg.wanted) {
-        console.log(` > npm update ${green(pkg.name)} ${kind}`);
-        const { status } = spawnSync(NPM_CMD, ["update", pkg.name, kind], SPAWN_OPTIONS);
+    // if (pkg.updateTo === pkg.wanted) {
+    //     console.log(` > npm update ${green(pkg.name)} ${kind}`);
+    //     const { status } = spawnSync(NPM_CMD, ["update", pkg.name, kind], SPAWN_OPTIONS);
 
-        return { status, remove: false };
-    }
+    //     return { status, remove: false };
+    // }
 
-    console.log(` > npm remove ${green(pkg.name)} ${kind}`);
+    console.log("");
+    console.log(bgBlue(yellow().bold(`> npm remove ${white(pkg.name)} ${kind}`)));
+    console.log("");
     const { status } = spawnSync(NPM_CMD, ["remove", pkg.name, kind], SPAWN_OPTIONS);
     if (status !== 0) {
         return { status, remove: false };
     }
 
     const completePackageName = `${pkg.name}@${pkg.updateTo}`;
-    console.log(` > npm install ${green(completePackageName)} ${kind}`);
+    console.log("");
+    console.log(bgBlue(yellow().bold(`> npm install ${white(completePackageName)} ${kind}`)));
+    console.log("");
 
     const { status: statusBis } = spawnSync(NPM_CMD, ["install", completePackageName, kind], SPAWN_OPTIONS);
 

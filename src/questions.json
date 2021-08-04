@@ -2,7 +2,7 @@
     "update_package": {
         "type": "confirm",
         "handle": "update",
-        "query": "Do you want to update the package ?",
+        "query": "Do you want to update this package ?",
         "accept": "y"
     },
     "run_test": {
@@ -16,6 +16,12 @@
         "handle": "gitCommit",
         "accept": "y",
         "query": "Do you want to commit after each package update ?"
+    },
+    "is_dev_dep": {
+        "type": "confirm",
+        "handle": "isDevDependencies",
+        "accept": "y",
+        "query": "Do you want to commit all dependencies has devDependencies?"
     },
     "git_template": {
         "type": "confirm",

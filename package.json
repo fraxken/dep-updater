@@ -38,6 +38,7 @@
     "devDependencies": {
         "@escommunity/minami": "^1.0.0",
         "@slimio/eslint-config": "^4.1.0",
+        "@types/node": "^16.4.12",
         "cross-env": "^7.0.3",
         "eslint": "^7.23.0",
         "jsdoc": "^3.6.6",
