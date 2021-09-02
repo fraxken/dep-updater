@@ -30,7 +30,7 @@
     },
     "homepage": "https://github.com/fraxken/dep-updater#readme",
     "dependencies": {
-        "isomorphic-git": "^0.67.2",
+        "isomorphic-git": "^1.8.2",
         "kleur": "^4.1.4",
         "make-promises-safe": "^5.1.0",
         "qoa": "^0.2.0"
