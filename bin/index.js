@@ -15,7 +15,6 @@ import qoa from "qoa";
 import git from "isomorphic-git";
 
 const { gray, green, bold, yellow, cyan, red, white, magenta, bgWhite, black } = kleur;
-git.plugins.set("fs", fs);
 
 // Import Internal Dependencies
 import { taggedString, findPkgKind } from "../src/utils.js";
@@ -43,6 +42,7 @@ if (!hasPackage) {
 const localPackage = JSON.parse(
   await fs.promises.readFile(path.join(CWD, "package.json"), { encoding: "utf8" })
 );
+const hasTestScript = "test" in (localPackage.scripts ?? {});
 const outdated = fetchOutdatedPackages();
 
 // Define list of packages to update!
@@ -89,21 +89,13 @@ if (packageToUpdate.length === 0) {
 
 // Configuration
 console.log(`\n${gray().bold(" <---------------------------------------->")}\n`);
-const { runTest } = await qoa.confirm(questions.run_test);
+const { runTest } = hasTestScript ? await qoa.confirm(questions.run_test) : { runTest: false };
 const { gitCommit } = await qoa.confirm(questions.git_commit);
 const { isDevDependencies } = gitCommit ? { isDevDependencies: false } : await qoa.confirm(questions.is_dev_dep);
 
 // Verify test and git on the local root/system
 console.log("");
 const author = gitCommit || isDevDependencies ? fetchGitUserInformations() : {};
-
-if (runTest) {
-  const scripts = localPackage.scripts || {};
-  if (!Reflect.has(scripts, "test")) {
-    exit("⛔️ Unable to found test script in local package.json");
-  }
-  console.log("✔️ npm test script must exist");
-}
 
 console.log(`${gray(" > Everything is okay ... ")}${magenta().bold("Running update in one second.")}`);
 await timers.setTimeout(1_000);
@@ -145,11 +137,7 @@ for (const pkg of packageToUpdate) {
     console.log("");
     console.log(bgWhite(`${black().bold("commit:")} ${black(message)}`));
 
-    await git.add({ dir: CWD, filepath: "package.json" });
-    if (hasLock) {
-      await git.add({ dir: CWD, filepath: "package-lock.json" });
-    }
-    await git.commit({ dir: CWD, message, author });
+    await commit(message);
   }
 }
 
@@ -158,16 +146,20 @@ if (isDevDependencies) {
   console.log("");
   console.log(bgWhite(`${black().bold("commit:")} ${black(message)}`));
 
-  await git.add({ dir: CWD, filepath: "package.json" });
-  if (hasLock) {
-    await git.add({ dir: CWD, filepath: "package-lock.json" });
-  }
-  await git.commit({ dir: CWD, message, author });
+  await commit(message);
 }
 
 console.log("\n\n" + green(" !!! -------------------------- !!!"));
 console.log(`${green(" > ✨ All packages updated ✨ <")}`);
 console.log(green(" !!! -------------------------- !!!") + "\n");
+
+async function commit(message) {
+  await git.add({ dir: CWD, filepath: "package.json", fs });
+  if (hasLock) {
+    await git.add({ dir: CWD, filepath: "package-lock.json", fs });
+  }
+  await git.commit({ dir: CWD, message, author, fs });
+}
 
 function exit(message) {
   console.log(message + "\n");

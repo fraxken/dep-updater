@@ -1,14 +1,16 @@
+// Import Node.js Dependencies
+import { spawnSync } from "node:child_process";
 
 export function fetchGitUserInformations() {
   const { stdout: nameStdout } = spawnSync(
     "git",
     ["config", "--global", "user.name"],
-    { cwd: process.cwd(), stdio: "inherit" }
+    { cwd: process.cwd() }
   );
   const { stdout: emailStdout } = spawnSync(
     "git",
     ["config", "--global", "user.email"],
-    { cwd: process.cwd(), stdio: "inherit" }
+    { cwd: process.cwd() }
   );
 
   return {
