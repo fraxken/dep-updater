@@ -1,54 +1,51 @@
 {
-    "name": "dep-updater",
-    "version": "1.0.0",
-    "description": "npm Dependencies Updater",
-    "main": "./bin/index.js",
-    "scripts": {
-        "prepublishOnly": "pkg-ok",
-        "doc": "jsdoc -c ./jsdoc.json -r -R ./README.md -P ./package.json --verbose"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/fraxken/dep-updater.git"
-    },
-    "keywords": [
-        "npm",
-        "dependencies",
-        "updater",
-        "management",
-        "upgrade",
-        "autoupdate"
-    ],
-    "files": [
-        "bin",
-        "src"
-    ],
-    "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/fraxken/dep-updater/issues"
-    },
-    "homepage": "https://github.com/fraxken/dep-updater#readme",
-    "dependencies": {
-        "isomorphic-git": "^0.67.2",
-        "kleur": "^4.1.4",
-        "make-promises-safe": "^5.1.0",
-        "qoa": "^0.2.0"
-    },
-    "devDependencies": {
-        "@escommunity/minami": "^1.0.0",
-        "@slimio/eslint-config": "^4.1.0",
-        "@types/node": "^16.4.12",
-        "cross-env": "^7.0.3",
-        "eslint": "^7.23.0",
-        "jsdoc": "^3.6.6",
-        "pkg-ok": "^2.3.1"
-    },
-    "engines": {
-        "node": ">=12"
-    },
-    "preferGlobal": true,
-    "bin": {
-        "depup": "./bin/index.js"
-    }
+  "name": "dep-updater",
+  "version": "1.0.0",
+  "description": "npm Dependencies Updater",
+  "main": "./bin/index.js",
+  "type": "module",
+  "scripts": {
+    "prepublishOnly": "pkg-ok"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fraxken/dep-updater.git"
+  },
+  "keywords": [
+    "npm",
+    "dependencies",
+    "updater",
+    "management",
+    "upgrade",
+    "autoupdate"
+  ],
+  "files": [
+    "bin",
+    "src"
+  ],
+  "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fraxken/dep-updater/issues"
+  },
+  "homepage": "https://github.com/fraxken/dep-updater#readme",
+  "dependencies": {
+    "isomorphic-git": "^1.23.0",
+    "kleur": "^4.1.5",
+    "make-promises-safe": "^5.1.0",
+    "qoa": "^0.2.0"
+  },
+  "devDependencies": {
+    "@nodesecure/eslint-config": "^1.7.0",
+    "@types/node": "^18.16.3",
+    "eslint": "^8.39.0",
+    "pkg-ok": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "preferGlobal": true,
+  "bin": {
+    "depup": "./bin/index.js"
+  }
 }

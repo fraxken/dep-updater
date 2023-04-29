@@ -1,7 +1,7 @@
 {
-    "extends": "@slimio/eslint-config",
-    "rules": {
-        "max-lines-per-function": "off",
-        "jsdoc/require-jsdoc": "off"
-    }
+  "extends": "@nodesecure/eslint-config",
+  "parserOptions": {
+    "sourceType": "module",
+    "requireConfigFile": false
+  }
 }

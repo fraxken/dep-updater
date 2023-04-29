@@ -3,8 +3,6 @@
 ![stability-unstable](https://img.shields.io/badge/stability-unstable-yellow.svg)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/fraxken/dep-updater/commit-activity)
 ![MIT](https://img.shields.io/github/license/mashape/apistatus.svg)
-![dep](https://img.shields.io/david/fraxken/dep-updater)
-![security](https://img.shields.io/badge/Security-Responsible%20Disclosure-yellow.svg?style=flat-square)
 
 npm Dependencies Updater.
 
