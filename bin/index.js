@@ -10,8 +10,8 @@ import fs from "node:fs";
 import * as timers from "node:timers/promises";
 
 // Import Third-party Dependencies
+import { confirm, select } from "@topcli/prompts";
 import kleur from "kleur";
-import qoa from "qoa";
 import git from "isomorphic-git";
 
 const { gray, green, bold, yellow, cyan, red, white, magenta, bgWhite, black } = kleur;
@@ -54,8 +54,8 @@ for (const pkg of outdated) {
 
   const updateTo = pkg.wanted === pkg.current ? pkg.latest : pkg.wanted;
   console.log(`\n${green().bold(pkg.name)} (${cyan().bold(pkg.current)} -> ${yellow().bold(updateTo)})`);
-  const { update } = await qoa.confirm(questions.update_package);
-  if (!update) {
+  const updatePackage = await confirm(questions.update_package);
+  if (!updatePackage) {
     continue;
   }
 
@@ -67,11 +67,8 @@ for (const pkg of outdated) {
     const wanted = `wanted (${yellow().bold(pkg.wanted)})`;
     const latest = `latest (${red().bold(pkg.latest)}) ⚠️`;
 
-    const { release } = await qoa.interactive({
-      type: "interactive",
-      handle: "release",
-      query: white().bold("which release do you want ?"),
-      menu: [wanted, latest]
+    const release = await select(white().bold("which release do you want ?"), {
+      choices: [wanted, latest]
     });
 
     pkg.updateTo = release === wanted ? pkg.wanted : pkg.latest;
@@ -89,9 +86,9 @@ if (packageToUpdate.length === 0) {
 
 // Configuration
 console.log(`\n${gray().bold(" <---------------------------------------->")}\n`);
-const { runTest } = hasTestScript ? await qoa.confirm(questions.run_test) : { runTest: false };
-const { gitCommit } = await qoa.confirm(questions.git_commit);
-const { isDevDependencies } = gitCommit ? { isDevDependencies: false } : await qoa.confirm(questions.is_dev_dep);
+const { runTest } = hasTestScript ? await confirm(questions.run_test) : { runTest: false };
+const { gitCommit } = await confirm(questions.git_commit);
+const { isDevDependencies } = gitCommit ? { isDevDependencies: false } : await confirm(questions.is_dev_dep);
 
 // Verify test and git on the local root/system
 console.log("");
