@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/fraxken/dep-updater#readme",
   "dependencies": {
-    "@topcli/prompts": "^0.1.1",
+    "@topcli/prompts": "^1.0.0",
     "isomorphic-git": "^1.23.0",
     "kleur": "^4.1.5",
     "make-promises-safe": "^5.1.0"

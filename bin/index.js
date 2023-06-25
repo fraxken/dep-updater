@@ -67,7 +67,7 @@ for (const pkg of outdated) {
     const wanted = `wanted (${yellow().bold(pkg.wanted)})`;
     const latest = `latest (${red().bold(pkg.latest)}) ⚠️`;
 
-    const release = await select(white().bold("which release do you want ?"), {
+    const release = await select(white().bold("Pick a release (minor or major)"), {
       choices: [wanted, latest]
     });
 
@@ -86,9 +86,9 @@ if (packageToUpdate.length === 0) {
 
 // Configuration
 console.log(`\n${gray().bold(" <---------------------------------------->")}\n`);
-const { runTest } = hasTestScript ? await confirm(questions.run_test) : { runTest: false };
-const { gitCommit } = await confirm(questions.git_commit);
-const { isDevDependencies } = gitCommit ? { isDevDependencies: false } : await confirm(questions.is_dev_dep);
+const runTest = hasTestScript ? await confirm(questions.run_test) : false;
+const gitCommit = await confirm(questions.git_commit);
+const isDevDependencies = gitCommit ? false : await confirm(questions.is_dev_dep);
 
 // Verify test and git on the local root/system
 console.log("");
