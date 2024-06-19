@@ -30,15 +30,15 @@
   },
   "homepage": "https://github.com/fraxken/dep-updater#readme",
   "dependencies": {
-    "@topcli/prompts": "^1.0.0",
-    "isomorphic-git": "^1.23.0",
+    "@topcli/prompts": "^1.10.1",
+    "isomorphic-git": "^1.25.10",
     "kleur": "^4.1.5",
     "make-promises-safe": "^5.1.0"
   },
   "devDependencies": {
-    "@nodesecure/eslint-config": "^1.7.0",
-    "@types/node": "^18.16.3",
-    "eslint": "^8.39.0",
+    "@nodesecure/eslint-config": "^1.9.0",
+    "@types/node": "^20.14.5",
+    "eslint": "^8.57.0",
     "pkg-ok": "^3.0.0"
   },
   "engines": {

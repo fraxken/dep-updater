@@ -9,7 +9,7 @@ const { gray, green, bgBlue, yellow, white } = kleur;
 import { parseOutDatedDependencies } from "./utils.js";
 
 // CONSTANTS
-const kSpawnOptions = { cwd: process.cwd(), env: process.env, stdio: "inherit" };
+const kSpawnOptions = { cwd: process.cwd(), env: process.env, stdio: "inherit", shell: true };
 const kNpmCommand = `npm${process.platform === "win32" ? ".cmd" : ""}`;
 const kNpmFlagKind = new Map([
   ["Dependencies", "-P"],
@@ -21,8 +21,10 @@ export function fetchOutdatedPackages() {
   console.log(`\n${gray().bold(" > npm outdated --json")}`);
 
   const { stdout } = spawnSync(kNpmCommand, ["outdated", "--json"], {
-    cwd: process.cwd()
+    cwd: process.cwd(),
+    shell: true
   });
+
   if (stdout.toString().trim().length === 0) {
     console.log("All dependencies are up-to-date\n");
     process.exit(0);
