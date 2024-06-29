@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import "make-promises-safe";
+import "dotenv/config";
 
 // Import Node.js Dependencies
 import assert from "node:assert/strict";
@@ -8,6 +9,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import * as timers from "node:timers/promises";
+import os from "node:os";
 
 // Import Third-party Dependencies
 import { confirm, select } from "@topcli/prompts";
@@ -21,6 +23,8 @@ import { taggedString, findPkgKind } from "../src/utils.js";
 import { fetchOutdatedPackages, update, rollback } from "../src/npm.js";
 import { fetchGitUserInformations } from "../src/git.js";
 import { questions } from "../src/questions.js";
+import { fromAsync } from "../src/array-from-async.js";
+import * as GHA from "../src/githubActions.js";
 
 // CONSTANTS
 const CWD = process.cwd();
@@ -77,10 +81,14 @@ for (const pkg of outdated) {
   packageToUpdate.push(pkg);
 }
 
-// Exit if there is no package to update
-if (packageToUpdate.length === 0) {
+const workflowsFilesLines = GHA.workflowsFilesLines();
+const githubActionsToUpdate = await fromAsync(GHA.fetchOutdatedGitHubActions(workflowsFilesLines));
+const hasGithubActions = githubActionsToUpdate !== null;
+const hasGHAUpdates = (githubActionsToUpdate ?? []).length > 0;
+// Exit if there is no package & GHA to update
+if (packageToUpdate.length === 0 && hasGHAUpdates === false) {
   exit(
-    white().bold(`\nNo package to update.. ${red("exiting process")}`)
+    white().bold(`\nNo package or GHA to update.. ${red("exiting process")}`)
   );
 }
 
@@ -92,7 +100,7 @@ const isDevDependencies = gitCommit ? false : await confirm(questions.is_dev_dep
 
 // Verify test and git on the local root/system
 console.log("");
-const author = gitCommit || isDevDependencies ? fetchGitUserInformations() : {};
+const author = fetchGitUserInformations();
 
 console.log(`${gray(" > Everything is okay ... ")}${magenta().bold("Running update in one second.")}`);
 await timers.setTimeout(1_000);
@@ -150,6 +158,38 @@ console.log("\n\n" + green(" !!! -------------------------- !!!"));
 console.log(`${green(" > ✨ All packages updated ✨ <")}`);
 console.log(green(" !!! -------------------------- !!!") + "\n");
 
+// GHA
+console.log(`\n${gray().bold(" <---------------------------------------->")}\n`);
+if (hasGHAUpdates === false) {
+  if (hasGithubActions === false) {
+    exit("No GitHub Actions found!");
+  }
+
+  exit("No GitHub Action to update!");
+}
+
+const updateGHAs = await confirm(questions.update_gha, { initial: true });
+if (!updateGHAs) {
+  exit();
+}
+
+const ghaCommit = await confirm(questions.gha_commit);
+for (const update of githubActionsToUpdate) {
+  const workflowLines = workflowsFilesLines.find(([absolutePath]) => absolutePath === update.absolutePath)[1];
+  workflowLines[update.index] = update.newLine;
+
+  fs.writeFileSync(update.absolutePath, workflowLines.join(os.EOL));
+}
+
+if (ghaCommit) {
+  await git.add({ dir: CWD, filepath: ".github/workflows", fs });
+  await git.commit({ dir: CWD, message: "chore: update GitHub Actions", author, fs });
+}
+
+console.log("\n\n" + green(" !!! -------------------------- !!!"));
+console.log(`${green(" > ✨ All GitHub Actions updated ✨ <")}`);
+console.log(green(" !!! -------------------------- !!!") + "\n");
+
 async function commit(message) {
   await git.add({ dir: CWD, filepath: "package.json", fs });
   if (hasLock) {
@@ -159,6 +199,8 @@ async function commit(message) {
 }
 
 function exit(message) {
-  console.log(message + "\n");
+  if (message) {
+    console.log(message + "\n");
+  }
   process.exit(0);
 }

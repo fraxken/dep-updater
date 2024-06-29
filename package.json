@@ -30,7 +30,10 @@
   },
   "homepage": "https://github.com/fraxken/dep-updater#readme",
   "dependencies": {
+    "@myunisoft/httpie": "^5.0.0",
+    "@nodesecure/fs-walk": "^2.0.0",
     "@topcli/prompts": "^1.10.1",
+    "dotenv": "^16.4.5",
     "isomorphic-git": "^1.25.10",
     "kleur": "^4.1.5",
     "make-promises-safe": "^5.1.0"
