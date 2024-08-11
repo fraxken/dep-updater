@@ -1,6 +1,5 @@
 # dep-updater
 ![version](https://img.shields.io/badge/dynamic/json.svg?url=https://raw.githubusercontent.com/fraxken/dep-updater/master/package.json&query=$.version&label=Version)
-![stability-unstable](https://img.shields.io/badge/stability-unstable-yellow.svg)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/fraxken/dep-updater/commit-activity)
 ![MIT](https://img.shields.io/github/license/mashape/apistatus.svg)
 
@@ -34,12 +33,5 @@ $ cd yourProject
 $ depup
 ```
 
-> **warning**: Be sure to only run the binary when you have no unstaged modification in your package.json
-
-## Roadmap v1.0.0
-- [BUG] Sometimes pkg.current is an Object !
-- Detect if the terminal support emoji or not.
-- Improve error handling from npm commands (update and delete).
-- Add argv option to change the default git template.
-- Add argv option to force test and commit (avoid option asking).
-- Add argv option to force updateAll (or updateWanted).
+> [!WARNING]
+> Be sure to only run the binary when you have no unstaged modification in your package.json
