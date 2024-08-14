@@ -4,27 +4,34 @@ import fs from "node:fs";
 
 // Import Third-party Dependencies
 import { walkSync } from "@nodesecure/fs-walk";
-import { request, Headers } from "@myunisoft/httpie";
+import { request } from "@myunisoft/httpie";
 
 // CONSTANTS
 const kGitHubApiUrl = "https://api.github.com";
 const kRequestOptions = {
-  headers: new Headers({
+  headers: {
     "X-GitHub-Api-Version": "2022-11-28",
     "user-agent": "dep-updater"
-  }),
+  },
   authorization: process.env.GITHUB_TOKEN
-};
-const kFetchedTags = new Map();
+} as const;
+const kFetchedTags = new Map<string, any>();
 
-export function workflowsFilesLines(options = {}) {
+export type WorkflowFileLine = (readonly [string, string[]])[];
+export interface WorkflowFilesLinesOptions {
+  workflowsPath?: string;
+}
+
+export function workflowsFilesLines(
+  options: WorkflowFilesLinesOptions = {}
+): WorkflowFileLine | [] {
   const {
     workflowsPath = ".github/workflows"
   } = options;
 
   const githubWorkflowPath = path.join(process.cwd(), workflowsPath);
   if (fs.existsSync(githubWorkflowPath) === false) {
-    return null;
+    return [];
   }
 
   const workflowsFilesPath = [
@@ -36,24 +43,32 @@ export function workflowsFilesLines(options = {}) {
     const content = fs.readFileSync(absolutePath, "utf8");
     const lines = content.split(/\r?\n/);
 
-    return [absolutePath, lines];
+    return [absolutePath, lines] as const;
   });
 
   return workflowFilesLines;
 }
 
-export async function* fetchOutdatedGitHubActions(workflowFilesLines) {
-  const projectGitHubActions = parseGitHubActions(workflowFilesLines);
-  if (projectGitHubActions.size === 0) {
-    return;
-  }
+export interface OutdatedGithubAction {
+  absolutePath: string;
+  index: number;
+  newLine: string;
+}
 
-  for (const [ga, usage] of projectGitHubActions) {
+export async function fetchOutdatedGitHubActions(
+  workflowFilesLines: WorkflowFileLine = []
+): Promise<OutdatedGithubAction[]> {
+  if (workflowFilesLines.length === 0) {
+    return [];
+  }
+  const outdated: OutdatedGithubAction[] = [];
+
+  for (const [ga, usage] of parseGitHubActions(workflowFilesLines)) {
     // format foo/bar/baz -> foo/bar
     const repository = ga.split("/").slice(0, 2).join("/");
     const [name, sha] = await getLastTagSha(repository);
 
-    for (const { absolutePath, line, index, version: usageVersion, pinned } of usage) {
+    for (const { absolutePath, line, index } of usage) {
       const [, version] = line.split("@");
       const newLine = `${line.replace(version, sha)} # ${name}`;
 
@@ -61,34 +76,51 @@ export async function* fetchOutdatedGitHubActions(workflowFilesLines) {
         continue;
       }
 
-      yield {
+      outdated.push({
         absolutePath,
         index,
         newLine
-      };
+      });
     }
   }
+
+  return outdated;
 }
 
-async function getLastTagSha(repo) {
+async function getLastTagSha(
+  repo: string
+): Promise<[string, string]> {
   const requestUrl = new URL(`/repos/${repo}/tags`, kGitHubApiUrl);
-  const { data } = await request("GET", requestUrl, kRequestOptions);
+  const { data } = await request<any>(
+    "GET",
+    requestUrl,
+    kRequestOptions
+  );
 
   kFetchedTags.set(repo, data);
 
-  return [data[0].name, data[0].commit.sha];
+  return [
+    data[0].name,
+    data[0].commit.sha
+  ];
 }
 
-function parseGitHubActions(workflowsFilesLines) {
-  const githubActions = new Map();
+export interface GithubActionUsage {
+  absolutePath: string;
+  line: string;
+  index: number;
+  version: string;
+  pinned: boolean;
+}
 
-  if ((workflowsFilesLines ?? []).length === 0) {
-    return githubActions;
-  }
+function parseGitHubActions(
+  workflowsFilesLines: WorkflowFileLine
+): Map<string, GithubActionUsage[]> {
+  const githubActions = new Map<string, GithubActionUsage[]>();
 
   for (const [absolutePath, lines] of workflowsFilesLines) {
     const linesWithGitHubAction = lines
-      .map((line, index) => [line, index])
+      .map((line, index) => [line, index] as const)
       .filter(([line]) => {
         const withoutWhiteSpace = line.replace(/\s/g, "");
 
@@ -97,25 +129,38 @@ function parseGitHubActions(workflowsFilesLines) {
 
     for (const [line, index] of linesWithGitHubAction) {
       const [, gaWithVersion] = line.split(":");
+
       // remove possible comment ("foo/bar@baz # v3.3.3" -> "foo/bar@baz")
-      const [ga, version] = gaWithVersion.replace(/\s/g, "").replace("#", " #").split(" ")[0].split("@");
-      const usage = { absolutePath, line, index, version, pinned: isPinned(version) };
+      const [ga, version] = gaWithVersion
+        .replace(/\s/g, "")
+        .replace("#", " #")
+        .split(" ")[0]
+        .split("@");
+
+      const usage: GithubActionUsage = {
+        absolutePath,
+        line,
+        index,
+        version,
+        pinned: isPinned(version)
+      };
 
       if (githubActions.has(ga)) {
-        const parsedGitHubActions = githubActions.get(ga);
-        githubActions.set(ga, [...parsedGitHubActions, usage].flat());
-
-        continue;
+        const parsedGitHubActions = githubActions.get(ga)!;
+        githubActions.set(ga, [...parsedGitHubActions, usage]);
       }
-
-      githubActions.set(ga, [usage]);
+      else {
+        githubActions.set(ga, [usage]);
+      }
     }
   }
 
   return githubActions;
 }
 
-function isPinned(version) {
+function isPinned(
+  version: string
+): boolean {
   if (!version.includes(".")) {
     // even if version does not contains a dot, it can be "v3" which is not a pinned version
     // length 10 make it safe

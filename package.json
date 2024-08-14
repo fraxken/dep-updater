@@ -2,10 +2,11 @@
   "name": "dep-updater",
   "version": "2.0.0",
   "description": "npm Dependencies Updater",
-  "main": "./bin/index.js",
+  "main": "./dist/bin/index.js",
   "type": "module",
   "scripts": {
-    "prepublishOnly": "pkg-ok"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -20,8 +21,7 @@
     "autoupdate"
   ],
   "files": [
-    "bin",
-    "src"
+    "dist"
   ],
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
   "license": "MIT",
@@ -35,20 +35,19 @@
     "@topcli/prompts": "^1.10.1",
     "dotenv": "^16.4.5",
     "isomorphic-git": "^1.25.10",
-    "kleur": "^4.1.5",
-    "make-promises-safe": "^5.1.0"
+    "kleur": "^4.1.5"
   },
   "devDependencies": {
-    "@nodesecure/eslint-config": "^1.9.0",
-    "@types/node": "^22.2.0",
-    "eslint": "^9.9.0",
-    "pkg-ok": "^3.0.0"
+    "@nodesecure/npm-types": "^1.1.1",
+    "@openally/config.eslint": "^1.0.0",
+    "@openally/config.typescript": "^1.0.3",
+    "@types/node": "^22.2.0"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=20"
   },
   "preferGlobal": true,
   "bin": {
-    "depup": "./bin/index.js"
+    "depup": "./dist/bin/index.js"
   }
 }

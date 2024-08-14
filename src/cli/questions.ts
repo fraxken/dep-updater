@@ -6,4 +6,4 @@ export const questions = {
   git_template: "Do you want to use the default commit template ?",
   update_gha: "Do you want to update GitHub Actions ?",
   gha_commit: "Do you want to commit GitHub Actions updates ?"
-};
+} as const;

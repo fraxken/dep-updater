@@ -1,0 +1,15 @@
+{
+  "extends": "@openally/config.typescript",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./"
+  },
+  "include": [
+    "src",
+    "bin"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}
