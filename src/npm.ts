@@ -7,26 +7,31 @@ import kleur from "kleur";
 const { gray, green, bgBlue, yellow, white } = kleur;
 
 // Import Internal Dependencies
-import { parseOutDatedDependencies } from "./utils.js";
+import {
+  parseOutDatedDependencies,
+  type NpmOutdatedDependency
+} from "./utils/index.js";
 
 // CONSTANTS
-const kSpawnOptions = { cwd: process.cwd(), env: process.env, stdio: "inherit", shell: true };
+const kSpawnOptions = {
+  cwd: process.cwd(),
+  env: process.env,
+  stdio: "inherit",
+  shell: true,
+  encoding: "buffer"
+} as const;
 const kNpmCommand = `npm${process.platform === "win32" ? ".cmd" : ""}`;
 const kNpmFlagKind = new Map([
-  ["Dependencies", "-P"],
-  ["DevDependencies", "-D"],
-  ["OptDependencies", "-O"],
-  ["PeerDependencies", "--save-peer"]
+  ["dependencies", "-P"],
+  ["devDependencies", "-D"],
+  ["optionalDependencies", "-O"],
+  ["peerDependencies", "--save-peer"]
 ]);
 
-/**
- * @param {!string} location
- * @param {!string[]} workspaces
- */
 export function fetchOutdatedPackages(
-  location,
-  workspaces
-) {
+  location: string,
+  workspaces: string[] = []
+): NpmOutdatedDependency[] {
   console.log(`\n${gray().bold(" > npm outdated --json")}`);
 
   const { stdout } = spawnSync(kNpmCommand, ["outdated", "--json"], {
@@ -39,31 +44,30 @@ export function fetchOutdatedPackages(
     process.exit(0);
   }
 
-  return parseOutDatedDependencies(stdout)
+  return [...parseOutDatedDependencies(stdout)]
     .map((pkg) => {
       const foundWorkspace = workspaces.find(
         (workspace) => workspace.includes(pkg.dependent)
       );
       if (foundWorkspace) {
-        pkg.workspaceSrc = path.join(location, foundWorkspace);
-        pkg.workspace = foundWorkspace;
-      }
-      else {
-        pkg.workspace = null;
+        pkg.workspace = {
+          relativePath: foundWorkspace,
+          absolutePath: path.join(location, foundWorkspace)
+        };
       }
 
       return pkg;
     });
 }
 
-/**
- * @function update
- * @description update a given package
- * @memberof npm#
- * @param {Depup.Dependencies} pkg package to install
- * @returns {object}
- */
-export function update(pkg) {
+export interface UpdateResult {
+  status: number | null;
+  remove: boolean;
+}
+
+export function update(
+  pkg
+): UpdateResult {
   const kind = kNpmFlagKind.get(pkg.kind);
   const logArgs = `${kind}${pkg.workspace ? ` -w ${pkg.workspace}` : ""}`;
 
@@ -94,19 +98,11 @@ export function update(pkg) {
   return { status, remove: true };
 }
 
-/**
- * @function rollback
- * @description Rollback package installation
- * @memberof npm#
- * @param {Depup.Dependencies} pkg package to install
- * @param {boolean} [remove=true] choose to remove first the package
- * @returns {void}
- */
 export function rollback(
-  pkg,
+  pkg: NpmOutdatedDependency,
   remove = true
-) {
-  const kind = kNpmFlagKind.get(pkg.kind);
+): void {
+  const kind = kNpmFlagKind.get(pkg.kind)!;
   const logArgs = `${kind}${pkg.workspace ? ` -w ${pkg.workspace}` : ""}`;
 
   if (remove) {
@@ -123,8 +119,11 @@ export function rollback(
   spawnSync(kNpmCommand, npmCommandArgs, kSpawnOptions);
 }
 
-function buildNpmCommand(pkg, commandName) {
-  const kind = kNpmFlagKind.get(pkg.kind);
+function buildNpmCommand(
+  pkg: NpmOutdatedDependency,
+  commandName: "install" | "remove"
+): string[] {
+  const kind = kNpmFlagKind.get(pkg.kind)!;
 
   const npmCommandArgs = [commandName, pkg.name, kind];
   if (pkg.workspace) {

@@ -1,34 +1,36 @@
 #!/usr/bin/env node
 
-import "make-promises-safe";
 import "dotenv/config";
 
 // Import Node.js Dependencies
 import assert from "node:assert/strict";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
 import fs from "node:fs";
-import * as timers from "node:timers/promises";
 import os from "node:os";
+import * as timers from "node:timers/promises";
+import { spawnSync } from "node:child_process";
 
 // Import Third-party Dependencies
+import type { WorkspacesPackageJSON } from "@nodesecure/npm-types";
 import { confirm, select } from "@topcli/prompts";
 import kleur from "kleur";
 import git from "isomorphic-git";
 
-const { gray, green, bold, yellow, cyan, red, white, magenta, bgWhite, black } = kleur;
-
 // Import Internal Dependencies
-import { taggedString, findPkgKind } from "../src/utils.js";
+import { taggedString, findPkgKind, type NpmOutdatedDependency } from "../src/utils/index.js";
 import { fetchOutdatedPackages, update, rollback } from "../src/npm.js";
 import { fetchGitUserInformations } from "../src/git.js";
-import { questions } from "../src/questions.js";
-import { fromAsync } from "../src/array-from-async.js";
+import { questions } from "../src/cli/questions.js";
 import * as GHA from "../src/githubActions.js";
+
+const { gray, green, bold, yellow, cyan, red, white, magenta, bgWhite, black } = kleur;
 
 // CONSTANTS
 const CWD = process.cwd();
-const kSpawnOptions = { cwd: CWD, env: process.env };
+const kSpawnOptions = {
+  cwd: CWD,
+  env: process.env
+} as const;
 const kNpmCommand = `npm${process.platform === "win32" ? ".cmd" : ""}`;
 const kGitTemplate = taggedString`chore: update ${"name"} (${"from"} to ${"to"})`;
 
@@ -42,10 +44,9 @@ if (!hasPackage) {
   );
 }
 
-// Read local package.json
 const localPackage = JSON.parse(
   await fs.promises.readFile(path.join(CWD, "package.json"), { encoding: "utf8" })
-);
+) as WorkspacesPackageJSON;
 const isWorkspace = "workspaces" in localPackage;
 const hasTestScript = "test" in (localPackage.scripts ?? {});
 const outdated = fetchOutdatedPackages(
@@ -54,7 +55,7 @@ const outdated = fetchOutdatedPackages(
 );
 
 // Define list of packages to update!
-const packageToUpdate = [];
+const packageToUpdate: NpmOutdatedDependency[] = [];
 for (const pkg of outdated) {
   if (pkg.current === pkg.latest) {
     continue;
@@ -68,7 +69,7 @@ for (const pkg of outdated) {
   console.log(
     `\n${workspaceName}${green().bold(pkg.name)} (${cyan().bold(pkg.current)} -> ${yellow().bold(updateTo)})`
   );
-  const updatePackage = await confirm(questions.update_package);
+  const updatePackage = await confirm(questions.update_package, {});
   if (!updatePackage) {
     continue;
   }
@@ -76,7 +77,7 @@ for (const pkg of outdated) {
   if (isWorkspacePkg) {
     const workspacePackage = JSON.parse(
       await fs.promises.readFile(
-        path.join(pkg.workspaceSrc, "package.json"),
+        path.join(pkg.workspace!.absolutePath, "package.json"),
         { encoding: "utf8" }
       )
     );
@@ -104,7 +105,8 @@ for (const pkg of outdated) {
 }
 
 const workflowsFilesLines = GHA.workflowsFilesLines();
-const githubActionsToUpdate = await fromAsync(GHA.fetchOutdatedGitHubActions(workflowsFilesLines));
+const githubActionsToUpdate = await GHA.fetchOutdatedGitHubActions(workflowsFilesLines);
+
 const hasGithubActions = githubActionsToUpdate !== null;
 const hasGHAUpdates = (githubActionsToUpdate ?? []).length > 0;
 // Exit if there is no package & GHA to update
@@ -116,9 +118,9 @@ if (packageToUpdate.length === 0 && hasGHAUpdates === false) {
 
 // Configuration
 console.log(`\n${gray().bold(" <---------------------------------------->")}\n`);
-const runTest = hasTestScript ? await confirm(questions.run_test) : false;
-const gitCommit = await confirm(questions.git_commit);
-const isDevDependencies = gitCommit ? false : await confirm(questions.is_dev_dep);
+const runTest = hasTestScript ? await confirm(questions.run_test, {}) : false;
+const gitCommit = await confirm(questions.git_commit, {});
+const isDevDependencies = gitCommit ? false : await confirm(questions.is_dev_dep, {});
 
 // Verify test and git on the local root/system
 console.log("");
@@ -130,7 +132,7 @@ await timers.setTimeout(1_000);
 // Run updates!
 for (const pkg of packageToUpdate) {
   console.log(gray("\n <---------------------------------------->\n"));
-  console.log(`updating ${bold(green(pkg.name))} (${cyan(pkg.current)} -> ${yellow(pkg.updateTo)})`);
+  console.log(`updating ${bold(green(pkg.name))} (${cyan(pkg.current)} -> ${yellow(pkg.updateTo!)})`);
   const { status, remove } = update(pkg);
   if (status !== 0) {
     console.log(red(`\n > Failed to update ${pkg.name} package!`));
@@ -144,8 +146,11 @@ for (const pkg of packageToUpdate) {
   if (runTest) {
     console.log(" > npm test");
     try {
-      const { signal, status } = spawnSync(kNpmCommand,
-        ["test"], { ...kSpawnOptions, stdio: "inherit" });
+      const { signal, status } = spawnSync(
+        kNpmCommand,
+        ["test"],
+        { ...kSpawnOptions, stdio: "inherit" }
+      );
       assert.equal(signal, null);
       assert.equal(status, 0);
     }
@@ -195,9 +200,10 @@ if (!updateGHAs) {
   exit();
 }
 
-const ghaCommit = await confirm(questions.gha_commit);
+const ghaCommit = await confirm(questions.gha_commit, {});
 for (const update of githubActionsToUpdate) {
-  const workflowLines = workflowsFilesLines.find(([absolutePath]) => absolutePath === update.absolutePath)[1];
+  const workflowLines = workflowsFilesLines
+    .find(([absolutePath]) => absolutePath === update.absolutePath)![1];
   workflowLines[update.index] = update.newLine;
 
   fs.writeFileSync(update.absolutePath, workflowLines.join(os.EOL));
@@ -212,7 +218,9 @@ console.log("\n\n" + green(" !!! -------------------------- !!!"));
 console.log(`${green(" > ✨ All GitHub Actions updated ✨ <")}`);
 console.log(green(" !!! -------------------------- !!!") + "\n");
 
-async function commit(message) {
+async function commit(
+  message: string
+): Promise<void> {
   await git.add({ dir: CWD, filepath: "package.json", fs });
   if (hasLock) {
     await git.add({ dir: CWD, filepath: "package-lock.json", fs });
@@ -220,7 +228,7 @@ async function commit(message) {
   await git.commit({ dir: CWD, message, author, fs });
 }
 
-function exit(message) {
+function exit(message?: string): void {
   if (message) {
     console.log(message + "\n");
   }
