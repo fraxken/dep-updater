@@ -1,5 +1,6 @@
 // Import Node.js Dependencies
 import { spawnSync } from "node:child_process";
+import path from "node:path";
 
 // Import Third-party Package
 import kleur from "kleur";
@@ -14,10 +15,18 @@ const kNpmCommand = `npm${process.platform === "win32" ? ".cmd" : ""}`;
 const kNpmFlagKind = new Map([
   ["Dependencies", "-P"],
   ["DevDependencies", "-D"],
-  ["OptDependencies", "-O"]
+  ["OptDependencies", "-O"],
+  ["PeerDependencies", "--save-peer"]
 ]);
 
-export function fetchOutdatedPackages() {
+/**
+ * @param {!string} location
+ * @param {!string[]} workspaces
+ */
+export function fetchOutdatedPackages(
+  location,
+  workspaces
+) {
   console.log(`\n${gray().bold(" > npm outdated --json")}`);
 
   const { stdout } = spawnSync(kNpmCommand, ["outdated", "--json"], {
@@ -30,7 +39,21 @@ export function fetchOutdatedPackages() {
     process.exit(0);
   }
 
-  return parseOutDatedDependencies(stdout);
+  return parseOutDatedDependencies(stdout)
+    .map((pkg) => {
+      const foundWorkspace = workspaces.find(
+        (workspace) => workspace.includes(pkg.dependent)
+      );
+      if (foundWorkspace) {
+        pkg.workspaceSrc = path.join(location, foundWorkspace);
+        pkg.workspace = foundWorkspace;
+      }
+      else {
+        pkg.workspace = null;
+      }
+
+      return pkg;
+    });
 }
 
 /**
@@ -42,30 +65,33 @@ export function fetchOutdatedPackages() {
  */
 export function update(pkg) {
   const kind = kNpmFlagKind.get(pkg.kind);
-
-  // if (pkg.updateTo === pkg.wanted) {
-  //     console.log(` > npm update ${green(pkg.name)} ${kind}`);
-  //     const { status } = spawnSync(kNpmCommand, ["update", pkg.name, kind], SPAWN_OPTIONS);
-
-  //     return { status, remove: false };
-  // }
+  const logArgs = `${kind}${pkg.workspace ? ` -w ${pkg.workspace}` : ""}`;
 
   console.log("");
-  console.log(bgBlue(yellow().bold(`> npm remove ${white(pkg.name)} ${kind}`)));
+  console.log(
+    bgBlue(yellow().bold(`> npm remove ${white(pkg.name)} ${logArgs}`))
+  );
   console.log("");
-  const { status } = spawnSync(kNpmCommand, ["remove", pkg.name, kind], kSpawnOptions);
-  if (status !== 0) {
-    return { status, remove: false };
+  {
+    const npmCommandArgs = buildNpmCommand(pkg, "remove");
+    const { status } = spawnSync(kNpmCommand, npmCommandArgs, kSpawnOptions);
+
+    if (status !== 0) {
+      return { status, remove: false };
+    }
   }
 
   const completePackageName = `${pkg.name}@${pkg.updateTo}`;
   console.log("");
-  console.log(bgBlue(yellow().bold(`> npm install ${white(completePackageName)} ${kind}`)));
+  console.log(
+    bgBlue(yellow().bold(`> npm install ${white(completePackageName)} ${logArgs}`))
+  );
   console.log("");
 
-  const { status: statusBis } = spawnSync(kNpmCommand, ["install", completePackageName, kind], kSpawnOptions);
+  const npmCommandArgs = buildNpmCommand(pkg, "install");
+  const { status } = spawnSync(kNpmCommand, npmCommandArgs, kSpawnOptions);
 
-  return { status: statusBis, remove: true };
+  return { status, remove: true };
 }
 
 /**
@@ -76,15 +102,34 @@ export function update(pkg) {
  * @param {boolean} [remove=true] choose to remove first the package
  * @returns {void}
  */
-export function rollback(pkg, remove = true) {
+export function rollback(
+  pkg,
+  remove = true
+) {
   const kind = kNpmFlagKind.get(pkg.kind);
+  const logArgs = `${kind}${pkg.workspace ? ` -w ${pkg.workspace}` : ""}`;
 
   if (remove) {
-    console.log(` > npm remove ${green(pkg.name)} ${kind}`);
-    spawnSync(kNpmCommand, ["remove", pkg.name, kind], kSpawnOptions);
+    console.log(` > npm remove ${green(pkg.name)} ${logArgs}`);
+
+    const npmCommandArgs = buildNpmCommand(pkg, "remove");
+    spawnSync(kNpmCommand, npmCommandArgs, kSpawnOptions);
   }
 
   const completePackageName = `${pkg.name}@${pkg.current}`;
-  console.log(` > npm install ${green(completePackageName)} ${kind}`);
-  spawnSync(kNpmCommand, ["install", completePackageName, kind], kSpawnOptions);
+  console.log(` > npm install ${green(completePackageName)} ${logArgs}`);
+
+  const npmCommandArgs = buildNpmCommand(pkg, "install");
+  spawnSync(kNpmCommand, npmCommandArgs, kSpawnOptions);
+}
+
+function buildNpmCommand(pkg, commandName) {
+  const kind = kNpmFlagKind.get(pkg.kind);
+
+  const npmCommandArgs = [commandName, pkg.name, kind];
+  if (pkg.workspace) {
+    npmCommandArgs.push(`--workspace ${pkg.workspace}`);
+  }
+
+  return npmCommandArgs;
 }

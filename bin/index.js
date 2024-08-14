@@ -46,8 +46,12 @@ if (!hasPackage) {
 const localPackage = JSON.parse(
   await fs.promises.readFile(path.join(CWD, "package.json"), { encoding: "utf8" })
 );
+const isWorkspace = "workspaces" in localPackage;
 const hasTestScript = "test" in (localPackage.scripts ?? {});
-const outdated = fetchOutdatedPackages();
+const outdated = fetchOutdatedPackages(
+  CWD,
+  localPackage.workspaces ?? []
+);
 
 // Define list of packages to update!
 const packageToUpdate = [];
@@ -57,13 +61,31 @@ for (const pkg of outdated) {
   }
 
   const updateTo = pkg.wanted === pkg.current ? pkg.latest : pkg.wanted;
-  console.log(`\n${green().bold(pkg.name)} (${cyan().bold(pkg.current)} -> ${yellow().bold(updateTo)})`);
+  const isWorkspacePkg = isWorkspace && pkg.workspace !== null;
+  const workspaceName = isWorkspacePkg ?
+    gray().bold(`[workspace: ${cyan(pkg.dependent)}] `) : "";
+
+  console.log(
+    `\n${workspaceName}${green().bold(pkg.name)} (${cyan().bold(pkg.current)} -> ${yellow().bold(updateTo)})`
+  );
   const updatePackage = await confirm(questions.update_package);
   if (!updatePackage) {
     continue;
   }
 
-  pkg.kind = findPkgKind(localPackage, pkg);
+  if (isWorkspacePkg) {
+    const workspacePackage = JSON.parse(
+      await fs.promises.readFile(
+        path.join(pkg.workspaceSrc, "package.json"),
+        { encoding: "utf8" }
+      )
+    );
+
+    pkg.kind = findPkgKind(workspacePackage, pkg);
+  }
+  else {
+    pkg.kind = findPkgKind(localPackage, pkg);
+  }
   pkg.updateTo = updateTo;
 
   if (pkg.wanted !== pkg.latest && pkg.current !== pkg.wanted) {

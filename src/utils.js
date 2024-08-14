@@ -65,5 +65,10 @@ export function findPkgKind(packageJSON, pkg) {
     return "OptDependencies";
   }
 
+  const peerDependencies = packageJSON.peerDependencies || {};
+  if (Reflect.has(peerDependencies, pkg.name)) {
+    return "PeerDependencies";
+  }
+
   return "Dependencies";
 }
