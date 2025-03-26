@@ -74,7 +74,7 @@ for (const pkg of outdated) {
     continue;
   }
 
-  if (isWorkspacePkg) {
+  if (isWorkspacePkg && localPackage.workspaces.includes(pkg.dependent)) {
     const workspacePackage = JSON.parse(
       await fs.promises.readFile(
         path.join(pkg.workspace!.absolutePath, "package.json"),

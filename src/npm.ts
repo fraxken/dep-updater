@@ -69,7 +69,7 @@ export function update(
   pkg
 ): UpdateResult {
   const kind = kNpmFlagKind.get(pkg.kind);
-  const logArgs = `${kind}${pkg.workspace ? ` -w ${pkg.workspace}` : ""}`;
+  const logArgs = `${kind}${pkg.workspace ? ` -w ${pkg.workspace.relativePath}` : ""}`;
 
   console.log("");
   console.log(
@@ -103,7 +103,7 @@ export function rollback(
   remove = true
 ): void {
   const kind = kNpmFlagKind.get(pkg.kind)!;
-  const logArgs = `${kind}${pkg.workspace ? ` -w ${pkg.workspace}` : ""}`;
+  const logArgs = `${kind}${pkg.workspace ? ` -w ${pkg.workspace.relativePath}` : ""}`;
 
   if (remove) {
     console.log(` > npm remove ${green(pkg.name)} ${logArgs}`);
@@ -127,7 +127,7 @@ function buildNpmCommand(
 
   const npmCommandArgs = [commandName, pkg.name, kind];
   if (pkg.workspace) {
-    npmCommandArgs.push(`--workspace ${pkg.workspace}`);
+    npmCommandArgs.push(`--workspace ${pkg.workspace.relativePath}`);
   }
 
   return npmCommandArgs;
