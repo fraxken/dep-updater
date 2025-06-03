@@ -66,7 +66,11 @@ export async function fetchOutdatedGitHubActions(
   for (const [ga, usage] of parseGitHubActions(workflowFilesLines)) {
     // format foo/bar/baz -> foo/bar
     const repository = ga.split("/").slice(0, 2).join("/");
-    const [name, sha] = await getLastTagSha(repository);
+    const lastSha = await getLastTagSha(repository);
+    if (lastSha === null) {
+      continue;
+    }
+    const [name, sha] = lastSha;
 
     for (const { absolutePath, line, index } of usage) {
       const [, version] = line.split("@");
@@ -89,14 +93,16 @@ export async function fetchOutdatedGitHubActions(
 
 async function getLastTagSha(
   repo: string
-): Promise<[string, string]> {
+): Promise<null | [string, string]> {
   const requestUrl = new URL(`/repos/${repo}/tags`, kGitHubApiUrl);
-  const { data } = await request<any>(
+  const { data, statusCode } = await request<any>(
     "GET",
     requestUrl,
     kRequestOptions
   );
-
+  if (statusCode !== 200) {
+    return null;
+  }
   kFetchedTags.set(repo, data);
 
   return [
