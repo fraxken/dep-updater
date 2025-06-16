@@ -39,9 +39,9 @@
   },
   "devDependencies": {
     "@nodesecure/npm-types": "^1.1.1",
-    "@openally/config.eslint": "^1.0.0",
+    "@openally/config.eslint": "^2.2.0",
     "@openally/config.typescript": "^1.0.3",
-    "@types/node": "^22.2.0"
+    "@types/node": "^24.0.3"
   },
   "engines": {
     "node": ">=20"
