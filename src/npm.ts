@@ -34,10 +34,14 @@ export function fetchOutdatedPackages(
 ): NpmOutdatedDependency[] {
   console.log(`\n${gray().bold(" > npm outdated --json")}`);
 
-  const { stdout } = spawnSync(kNpmCommand, ["outdated", "--json"], {
-    cwd: process.cwd(),
-    shell: true
-  });
+  const command = [kNpmCommand, "outdated", "--json"].join(" ");
+  const { stdout } = spawnSync(
+    command,
+    {
+      cwd: process.cwd(),
+      shell: true
+    }
+  );
 
   if (stdout.toString().trim().length === 0) {
     console.log("All dependencies are up-to-date\n");
@@ -77,8 +81,11 @@ export function update(
   );
   console.log("");
   {
-    const npmCommandArgs = buildNpmCommand(pkg, "remove");
-    const { status } = spawnSync(kNpmCommand, npmCommandArgs, kSpawnOptions);
+    const command = buildNpmCommand(pkg, "remove");
+    const { status } = spawnSync(
+      command,
+      kSpawnOptions
+    );
 
     if (status !== 0) {
       return { status, remove: false };
@@ -92,8 +99,11 @@ export function update(
   );
   console.log("");
 
-  const npmCommandArgs = buildNpmCommand(pkg, "install");
-  const { status } = spawnSync(kNpmCommand, npmCommandArgs, kSpawnOptions);
+  const command = buildNpmCommand(pkg, "install");
+  const { status } = spawnSync(
+    command,
+    kSpawnOptions
+  );
 
   return { status, remove: true };
 }
@@ -108,21 +118,27 @@ export function rollback(
   if (remove) {
     console.log(` > npm remove ${green(pkg.name)} ${logArgs}`);
 
-    const npmCommandArgs = buildNpmCommand(pkg, "remove");
-    spawnSync(kNpmCommand, npmCommandArgs, kSpawnOptions);
+    const command = buildNpmCommand(pkg, "remove");
+    spawnSync(
+      command,
+      kSpawnOptions
+    );
   }
 
   const completePackageName = `${pkg.name}@${pkg.current}`;
   console.log(` > npm install ${green(completePackageName)} ${logArgs}`);
 
-  const npmCommandArgs = buildNpmCommand(pkg, "install");
-  spawnSync(kNpmCommand, npmCommandArgs, kSpawnOptions);
+  const command = buildNpmCommand(pkg, "install");
+  spawnSync(
+    command,
+    kSpawnOptions
+  );
 }
 
 function buildNpmCommand(
   pkg: NpmOutdatedDependency,
   commandName: "install" | "remove"
-): string[] {
+): string {
   const kind = kNpmFlagKind.get(pkg.kind)!;
 
   const npmCommandArgs = [commandName, pkg.name, kind];
@@ -130,5 +146,5 @@ function buildNpmCommand(
     npmCommandArgs.push(`--workspace ${pkg.workspace.relativePath}`);
   }
 
-  return npmCommandArgs;
+  return [kNpmCommand, ...npmCommandArgs].join(" ");
 }

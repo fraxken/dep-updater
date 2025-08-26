@@ -148,8 +148,7 @@ for (const pkg of packageToUpdate) {
     console.log(" > npm test");
     try {
       const { signal, status } = spawnSync(
-        kNpmCommand,
-        ["test"],
+        kNpmCommand + " test",
         { ...kSpawnOptions, stdio: "inherit" }
       );
       assert.equal(signal, null);
