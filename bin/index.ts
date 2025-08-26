@@ -1,6 +1,7 @@
 #!/usr/bin/env node --no-warnings
 
-import "dotenv/config";
+import { config } from "dotenv";
+config({ quiet: true });
 
 // Import Node.js Dependencies
 import assert from "node:assert/strict";
@@ -26,31 +27,31 @@ import * as GHA from "../src/githubActions.js";
 const { gray, green, bold, yellow, cyan, red, white, magenta, bgWhite, black } = kleur;
 
 // CONSTANTS
-const CWD = process.cwd();
+const kCurrentDirectory = process.cwd();
 const kSpawnOptions = {
-  cwd: CWD,
+  cwd: kCurrentDirectory,
   env: process.env
 } as const;
 const kNpmCommand = `npm${process.platform === "win32" ? ".cmd" : ""}`;
 const kGitTemplate = taggedString`chore: update ${"name"} (${"from"} to ${"to"})`;
 
 const [hasPackage, hasLock] = [
-  fs.existsSync(path.join(CWD, "package.json")),
-  fs.existsSync(path.join(CWD, "package-lock.json"))
+  fs.existsSync(path.join(kCurrentDirectory, "package.json")),
+  fs.existsSync(path.join(kCurrentDirectory, "package-lock.json"))
 ];
 if (!hasPackage) {
   exit(
-    red().bold(`\n > No package.json found on current working dir: ${yellow().bold(CWD)}`)
+    red().bold(`\n > No package.json found on current working dir: ${yellow().bold(kCurrentDirectory)}`)
   );
 }
 
 const localPackage = JSON.parse(
-  await fs.promises.readFile(path.join(CWD, "package.json"), { encoding: "utf8" })
+  await fs.promises.readFile(path.join(kCurrentDirectory, "package.json"), { encoding: "utf8" })
 ) as WorkspacesPackageJSON;
 const isWorkspace = "workspaces" in localPackage;
 const hasTestScript = "test" in (localPackage.scripts ?? {});
 const outdated = fetchOutdatedPackages(
-  CWD,
+  kCurrentDirectory,
   localPackage.workspaces ?? []
 );
 
@@ -210,8 +211,8 @@ for (const update of githubActionsToUpdate) {
 }
 
 if (ghaCommit) {
-  await git.add({ dir: CWD, filepath: ".github/workflows", fs });
-  await git.commit({ dir: CWD, message: "chore: update GitHub Actions", author, fs });
+  await git.add({ dir: kCurrentDirectory, filepath: ".github/workflows", fs });
+  await git.commit({ dir: kCurrentDirectory, message: "chore: update GitHub Actions", author, fs });
 }
 
 console.log("\n\n" + green(" !!! -------------------------- !!!"));
@@ -221,11 +222,11 @@ console.log(green(" !!! -------------------------- !!!") + "\n");
 async function commit(
   message: string
 ): Promise<void> {
-  await git.add({ dir: CWD, filepath: "package.json", fs });
+  await git.add({ dir: kCurrentDirectory, filepath: "package.json", fs });
   if (hasLock) {
-    await git.add({ dir: CWD, filepath: "package-lock.json", fs });
+    await git.add({ dir: kCurrentDirectory, filepath: "package-lock.json", fs });
   }
-  await git.commit({ dir: CWD, message, author, fs });
+  await git.commit({ dir: kCurrentDirectory, message, author, fs });
 }
 
 function exit(message?: string): void {

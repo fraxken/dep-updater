@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "lint": "eslint src/*.ts",
     "prepublishOnly": "npm run build"
   },
   "repository": {
@@ -30,18 +31,18 @@
   },
   "homepage": "https://github.com/fraxken/dep-updater#readme",
   "dependencies": {
-    "@myunisoft/httpie": "^5.0.0",
     "@nodesecure/fs-walk": "^2.0.0",
-    "@topcli/prompts": "^2.0.0",
-    "dotenv": "^16.4.5",
-    "isomorphic-git": "^1.25.10",
+    "@nodesecure/npm-types": "^1.2.1",
+    "@openally/httpie": "^1.0.0",
+    "@topcli/prompts": "^2.3.0",
+    "dotenv": "^17.2.1",
+    "isomorphic-git": "^1.33.0",
     "kleur": "^4.1.5"
   },
   "devDependencies": {
-    "@nodesecure/npm-types": "^1.1.1",
-    "@openally/config.eslint": "^1.0.0",
-    "@openally/config.typescript": "^1.0.3",
-    "@types/node": "^22.2.0"
+    "@openally/config.eslint": "^2.2.0",
+    "@openally/config.typescript": "^1.1.0",
+    "@types/node": "^24.3.0"
   },
   "engines": {
     "node": ">=20"

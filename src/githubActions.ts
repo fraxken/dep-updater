@@ -4,7 +4,7 @@ import fs from "node:fs";
 
 // Import Third-party Dependencies
 import { walkSync } from "@nodesecure/fs-walk";
-import { request } from "@myunisoft/httpie";
+import { request } from "@openally/httpie";
 
 // CONSTANTS
 const kGitHubApiUrl = "https://api.github.com";

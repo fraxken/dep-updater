@@ -2,7 +2,7 @@
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 
-// Import Third-party Package
+// Import Third-party Dependencies
 import kleur from "kleur";
 const { gray, green, bgBlue, yellow, white } = kleur;
 
