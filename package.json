@@ -35,7 +35,6 @@
     "@nodesecure/npm-types": "^1.3.0",
     "@topcli/prompts": "^2.4.1",
     "isomorphic-git": "^1.36.1",
-    "kleur": "^4.1.5",
     "undici": "7.16.0"
   },
   "devDependencies": {

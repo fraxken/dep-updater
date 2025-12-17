@@ -2,15 +2,14 @@
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 
-// Import Third-party Dependencies
-import kleur from "kleur";
-const { gray, green, bgBlue, yellow, white } = kleur;
-
 // Import Internal Dependencies
 import {
   parseOutDatedDependencies,
   type NpmOutdatedDependency
 } from "./utils/index.ts";
+import colors from "./colors.ts";
+
+const { gray, green, bgBlue, yellow, white } = colors;
 
 // CONSTANTS
 const kSpawnOptions = {
@@ -32,7 +31,7 @@ export function fetchOutdatedPackages(
   location: string,
   workspaces: string[] = []
 ): NpmOutdatedDependency[] {
-  console.log(`\n${gray().bold(" > npm outdated --json")}`);
+  console.log(`\n${gray.bold(" > npm outdated --json")}`);
 
   const command = [kNpmCommand, "outdated", "--json"].join(" ");
   const { stdout } = spawnSync(
@@ -77,7 +76,7 @@ export function update(
 
   console.log("");
   console.log(
-    bgBlue(yellow().bold(`> npm remove ${white(pkg.name)} ${logArgs}`))
+    bgBlue(yellow.bold(`> npm remove ${white(pkg.name)} ${logArgs}`))
   );
   console.log("");
   {
@@ -95,7 +94,7 @@ export function update(
   const completePackageName = `${pkg.name}@${pkg.updateTo}`;
   console.log("");
   console.log(
-    bgBlue(yellow().bold(`> npm install ${white(completePackageName)} ${logArgs}`))
+    bgBlue(yellow.bold(`> npm install ${white(completePackageName)} ${logArgs}`))
   );
   console.log("");
 
