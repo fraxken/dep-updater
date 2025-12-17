@@ -1,8 +1,5 @@
 #!/usr/bin/env node --no-warnings
 
-import { config } from "dotenv";
-config({ quiet: true });
-
 // Import Node.js Dependencies
 import assert from "node:assert/strict";
 import path from "node:path";
@@ -18,11 +15,11 @@ import kleur from "kleur";
 import git from "isomorphic-git";
 
 // Import Internal Dependencies
-import { taggedString, findPkgKind, type NpmOutdatedDependency } from "../src/utils/index.js";
-import { fetchOutdatedPackages, update, rollback } from "../src/npm.js";
-import { fetchGitUserInformations } from "../src/git.js";
-import { questions } from "../src/cli/questions.js";
-import * as GHA from "../src/githubActions.js";
+import { taggedString, findPkgKind, type NpmOutdatedDependency } from "../src/utils/index.ts";
+import { fetchOutdatedPackages, update, rollback } from "../src/npm.ts";
+import { fetchGitUserInformations } from "../src/git.ts";
+import { questions } from "../src/cli/questions.ts";
+import * as GHA from "../src/githubActions.ts";
 
 const { gray, green, bold, yellow, cyan, red, white, magenta, bgWhite, black } = kleur;
 

@@ -1,3 +1,3 @@
-export * from "./parseOutdatedDependencies.js";
-export * from "./taggedString.js";
-export * from "./findPkgKind.js";
+export * from "./parseOutdatedDependencies.ts";
+export * from "./taggedString.ts";
+export * from "./findPkgKind.ts";

@@ -35,7 +35,6 @@
     "@nodesecure/npm-types": "^1.3.0",
     "@openally/httpie": "^1.0.0",
     "@topcli/prompts": "^2.4.1",
-    "dotenv": "^17.2.3",
     "isomorphic-git": "^1.36.1",
     "kleur": "^4.1.5"
   },

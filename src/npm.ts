@@ -10,7 +10,7 @@ const { gray, green, bgBlue, yellow, white } = kleur;
 import {
   parseOutDatedDependencies,
   type NpmOutdatedDependency
-} from "./utils/index.js";
+} from "./utils/index.ts";
 
 // CONSTANTS
 const kSpawnOptions = {

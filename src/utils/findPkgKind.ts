@@ -4,7 +4,7 @@ import type { PackageJSON, WorkspacesPackageJSON } from "@nodesecure/npm-types";
 // Import Internal Dependencies
 import type {
   NpmOutdatedDependency
-} from "./parseOutdatedDependencies.js";
+} from "./parseOutdatedDependencies.ts";
 
 export function findPkgKind(
   packageJSON: PackageJSON | WorkspacesPackageJSON,
