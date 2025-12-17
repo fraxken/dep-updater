@@ -4,16 +4,16 @@ import fs from "node:fs";
 
 // Import Third-party Dependencies
 import { walkSync } from "@nodesecure/fs-walk";
-import { request } from "@openally/httpie";
+import { request } from "undici";
 
 // CONSTANTS
 const kGitHubApiUrl = "https://api.github.com";
 const kRequestOptions = {
   headers: {
     "X-GitHub-Api-Version": "2022-11-28",
-    "user-agent": "dep-updater"
-  },
-  authorization: process.env.GITHUB_TOKEN
+    "user-agent": "dep-updater",
+    authorization: `Bearer ${process.env.GITHUB_TOKEN}`
+  }
 } as const;
 const kFetchedTags = new Map<string, any>();
 
@@ -95,11 +95,14 @@ async function getLastTagSha(
   repo: string
 ): Promise<null | [string, string]> {
   const requestUrl = new URL(`/repos/${repo}/tags`, kGitHubApiUrl);
-  const { data, statusCode } = await request<any>(
-    "GET",
+  const { body, statusCode } = await request(
     requestUrl,
-    kRequestOptions
+    {
+      method: "GET",
+      ...kRequestOptions
+    }
   );
+  const data = await body.json() as any[];
   if (statusCode !== 200) {
     return null;
   }
